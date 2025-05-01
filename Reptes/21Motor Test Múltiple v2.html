@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test d'Opcions Múltiples</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+            background-color: #f5f8ff;
+        }
+        .header-info {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+        .question-container {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .option {
+            display: block;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .option:hover {
+            background: #e0ebff;
+            transform: scale(1.05);
+        }
+        .correct {
+            background: #c8e6c9;
+            border-color: green;
+        }
+        .incorrect {
+            background: #ffcdd2;
+            border-color: red;
+        }
+        #start-btn, #restart-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #restart-btn {
+            background: #28a745;
+        }
+        #next-btn {
+            position: fixed;
+            right: 20px;
+            top: 30%;
+            padding: 10px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            display: none;
+        }
+        #info-container {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-info">
+        <div>Tomás Cuesta</div>
+        <div>IES Juan de la Cierva</div>
+    </div>
+
+    <h1>Test d'Opcions Múltiples</h1>
+    <label for="file-input">Selecciona l'arxiu JSON:</label>
+    <input type="file" id="file-input" accept=".json">
+    <div id="info-container"></div>
+    <button id="start-btn">Començar Test</button>
+
+    <div id="quiz-container" class="question-container"></div>
+    <button id="next-btn">Següent</button>
+    <button id="restart-btn">Reiniciar</button>
+
+    <script>
+        // Dades i referències
+        let preguntas = [];
+        let preguntasElegides = [];
+        let preguntaActual = 0;
+        let correctes = 0;
+        let score = 0; // Acumulador de nota
+
+        const quizContainer = document.getElementById('quiz-container');
+        const nextButton   = document.getElementById('next-btn');
+        const restartButton= document.getElementById('restart-btn');
+        const startButton  = document.getElementById('start-btn');
+        const infoContainer= document.getElementById('info-container');
+        const fileInput    = document.getElementById('file-input');
+
+        // Fisher–Yates per barrejar
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Carrega JSON
+        fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.preguntas || !Array.isArray(data.preguntas)) {
+                        throw new Error('Format JSON incorrecte.');
+                    }
+                    preguntas = data.preguntas;
+                    infoContainer.innerHTML = `<p>L'arxiu conté <strong>${preguntas.length}</strong> preguntes. Podràs triar quantes en vols respondre.</p>`;
+                    startButton.style.display = 'block';
+                    fileInput.disabled = true;
+                } catch (err) {
+                    alert('Error en llegir el JSON: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // Començar el test
+        startButton.addEventListener('click', function() {
+            let num = prompt(`El test té ${preguntas.length} preguntes. Quantes en vols jugar?`, preguntas.length);
+            num = parseInt(num);
+            if (isNaN(num) || num < 1 || num > preguntas.length) {
+                alert('Nombre no vàlid. Es jugaran totes les preguntes.');
+                num = preguntas.length;
+            }
+            preguntasElegides = shuffle([...preguntas]).slice(0, num);
+            preguntaActual = 0;
+            correctes = 0;
+            score = 0;
+            startButton.style.display = 'none';
+            infoContainer.innerHTML = '';
+            mostrarPregunta();
+        });
+
+        // Mostrar pregunta o resultat final
+        function mostrarPregunta() {
+            if (preguntaActual < preguntasElegides.length) {
+                quizContainer.innerHTML = '';
+                quizContainer.style.display = 'block';
+                nextButton.style.display = 'none';
+
+                const pregunta = preguntasElegides[preguntaActual];
+                const titulo = document.createElement('h2');
+                titulo.textContent = pregunta.texto;
+                quizContainer.appendChild(titulo);
+
+                // Opcions barrejades
+                let opcionsArray = Object.entries(pregunta.opciones)
+                    .map(([key, texto]) => ({ key, texto }));
+                opcionsArray = shuffle(opcionsArray);
+
+                opcionsArray.forEach(opt => {
+                    const div = document.createElement('div');
+                    div.classList.add('option');
+                    div.textContent = opt.texto;
+                    div.dataset.valor = opt.key;
+                    div.addEventListener('click', () => validarResposta(div, pregunta.respuesta));
+                    quizContainer.appendChild(div);
+                });
+
+            } else {
+                // Càlcul nota final
+                const notaFinal = Math.max(0, score).toFixed(1);
+                quizContainer.innerHTML = `
+                    <h2>Test finalitzat!</h2>
+                    <p>Has encertat ${correctes} de ${preguntasElegides.length} preguntes.</p>
+                    <p><strong>Nota: ${notaFinal} / 10</strong></p>
+                `;
+                nextButton.style.display = 'none';
+                restartButton.style.display = 'block';
+            }
+        }
+
+        // Validar resposta i ajustar score
+        function validarResposta(elem, respostaCorrecta) {
+            const totesOpcions = document.querySelectorAll('.option');
+            totesOpcions.forEach(o => o.style.pointerEvents = 'none');
+
+            const valor = 10 / preguntasElegides.length;
+            const numOpcions = totesOpcions.length;
+            const penal = valor / (numOpcions - 1);
+
+            if (elem.dataset.valor === respostaCorrecta) {
+                elem.classList.add('correct');
+                correctes++;
+                score += valor;
+            } else {
+                elem.classList.add('incorrect');
+                const correcta = document.querySelector(`.option[data-valor='${respostaCorrecta}']`);
+                if (correcta) correcta.classList.add('correct');
+                score -= penal;
+            }
+            nextButton.style.display = 'block';
+        }
+
+        // Següent pregunta
+        nextButton.addEventListener('click', function() {
+            preguntaActual++;
+            mostrarPregunta();
+        });
+
+        // Reiniciar tot
+        restartButton.addEventListener('click', function() {
+            restartButton.style.display = 'none';
+            startButton.style.display = 'none';
+            preguntaActual = 0;
+            correctes = 0;
+            score = 0;
+            infoContainer.innerHTML = `<p>L'arxiu conté <strong>${preguntas.length}</strong> preguntes. Podràs triar quantes en vols respondre.</p>`;
+            startButton.style.display = 'block';
+            quizContainer.innerHTML = '';
+            quizContainer.style.display = 'none';
+            fileInput.disabled = false;
+            fileInput.value = "";
+        });
+    </script>
+</body>
+</html>

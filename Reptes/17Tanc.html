@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tanc Artiller</title>
+  <!-- Tomás Cuesta tomcue@iesjuandelacierva.com -->
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body { font-family: 'Arial', sans-serif; background: linear-gradient(to bottom, #87CEEB, #1E90FF); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    h1 { margin: 10px; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); font-size: clamp(1.5rem, 4vw, 2.5rem); }
+    #panel-configuracio { background: rgba(0,0,0,0.7); color: #fff; padding: 20px; border-radius: 10px; width: min(90vw, 400px); margin-bottom: 10px; }
+    #panel-configuracio label { display: block; margin-bottom: 5px; font-size: 1.1rem; }
+    #panel-configuracio input { width: 100%; padding: 8px; border-radius: 5px; border: none; margin-bottom: 10px; }
+    #panel-configuracio button { width: 100%; padding: 10px; background: #4CAF50; color: #fff; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; }
+    #panel-configuracio button:hover { background: #45a049; }
+    #contenidor-joc { position: relative; width: min(90vw, 800px); height: min(60vh, 500px); background: linear-gradient(to bottom, #32CD32, #228B22); border: 3px solid #333; border-radius: 10px; overflow: hidden; margin-bottom: 0; display: none; }
+    .terreny { position: absolute; bottom: 0; width: 100%; height: 20px; background: #8B4513; }
+    #panel-info, #mostra-vent { position: absolute; padding: 8px; border-radius: 5px; background: rgba(0,0,0,0.5); color: #fff; text-shadow: 1px 1px 2px #000; font-size: clamp(0.8rem, 2vw, 1rem); z-index: 100; }
+    #panel-info { top: 10px; left: 10px; }
+    #mostra-vent { top: 10px; right: 10px; }
+    .tanc { position: absolute; bottom: 20px; width: 80px; height: 50px; border-radius: 10px 10px 0 0; display: flex; align-items: center; justify-content: center; z-index: 5; }
+    .cos-tanc { width: 100%; height: 100%; position: relative; overflow: hidden; border-radius: 10px 10px 0 0; }
+    .vida-tanc { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: #4CAF50; transition: height .3s, background .3s; }
+    .canon-tanc { position: absolute; bottom: 40px; left: 40px; width: 40px; height: 8px; background: #696969; transform-origin: 0% 50%; border-radius: 3px; }
+    .bala { position: absolute; width: 10px; height: 10px; background: #000; border-radius: 50%; z-index: 10; }
+    .explosio { position: absolute; width: 50px; height: 50px; background: radial-gradient(circle, yellow, orange, red); border-radius: 50%; animation: explotar .5s forwards; z-index: 15; }
+    @keyframes explotar { 0% { transform: scale(0); opacity:1; } 100% { transform: scale(3); opacity:0; } }
+    .objectiu { position: absolute; bottom: 20px; width: 40px; height: 60px; background: #8B0000; border-radius: 5px 5px 0 0; z-index: 4; }
+    #final-joc { display: none; position: absolute; top:50%; left:50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: #fff; padding: 20px; border-radius: 10px; text-align: center; width: 80%; max-width: 400px; z-index: 200; }
+    #final-joc button { margin-top: 15px; padding: 10px 20px; background: #4CAF50; border: none; border-radius: 5px; color: #fff; cursor: pointer; }
+    #panel-controles { display: none; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; margin-top: 10px; width: min(90vw,800px); display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+    .grup-control { display: flex; align-items: center; gap: 5px; }
+    .grup-control label { color: #fff; font-size: 1rem; min-width: 60px; }
+    .grup-control input[type="range"] { width: 150px; }
+    .grup-control span { color: #fff; width: 30px; text-align: center; }
+    #boton-disparar { padding: 8px 20px; background: #f44336; border: none; border-radius: 5px; color: #fff; font-weight: bold; cursor: pointer; }
+    #boton-disparar:disabled { background: #777; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <h1>Tanc Artiller</h1>
+  <h2 style="font-size: 0.75rem;">Tomás Cuesta</h2>
+
+  <div id="panel-configuracio">
+    <label for="municio-input">Munició (1-30):</label>
+    <input type="number" id="municio-input" min="1" max="30" value="15">
+    <button id="iniciar-btn">Començar joc</button>
+  </div>
+
+  <div id="contenidor-joc">
+    <div id="panel-info">
+      <div id="mostra-puntuacio">Puntuació: 0</div>
+      <div id="mostra-disparos">Disparos: 0/15</div>
+      <div id="mostra-temporitzador">Temps: 60s</div>
+    </div>
+    <div id="mostra-vent">Vent: 0.0 m/s</div>
+    <div class="terreny"></div>
+    <div id="final-joc">
+      <h2>JOC ACABAT!</h2>
+      <p id="puntuacio-final">Puntuació: 0</p>
+      <button id="reiniciar-btn">Jugar de nou</button>
+    </div>
+  </div>
+
+  <div id="panel-controles">
+    <div class="grup-control">
+      <label for="slider-angle">Angle:</label>
+      <input type="range" id="slider-angle" min="0" max="90" value="45">
+      <span id="valor-angle">45°</span>
+    </div>
+    <div class="grup-control">
+      <label for="slider-potencia">Potència:</label>
+      <input type="range" id="slider-potencia" min="10" max="100" value="50">
+      <span id="valor-potencia">50%</span>
+    </div>
+    <button id="boton-disparar">DISPARAR</button>
+  </div>
+
+  <script>
+    // Constants físiques i del joc
+    const GRAVETAT = 0.15;
+    const RESISTENCIA_AIRE = 0.005;
+    const FACTOR_VENT = 0.08;
+    const VELOCITAT_BASE_BALA = 4;
+    const ESCALA_POTENCIA_BALA = 10;
+    const ALTURA_TERRENY = 20;
+    const PUNT_PER_OBJECTIU = 10;
+    const TEMPS_INICIAL = 60;
+    const OBJECTIUS_PER_RONDA = 3;
+    const MUNICIO_MIN = 1;
+    const MUNICIO_MAX = 30;
+    const MUNICIO_DEFECTE = 15;
+
+    class GestorAudio {
+      constructor() {
+        this.contextAudio = null;
+        this.inicialitzat = false;
+        document.body.addEventListener('click', this.init.bind(this), { once: true });
+        document.body.addEventListener('touchstart', this.init.bind(this), { once: true });
+      }
+      init() {
+        if (this.inicialitzat) return;
+        try {
+          this.contextAudio = new (window.AudioContext || window.webkitAudioContext)();
+          if (this.contextAudio.state === 'suspended') this.contextAudio.resume();
+          this.inicialitzat = true;
+        } catch (e) {
+          alert("Àudio no suportat. El joc funcionarà sense so.");
+        }
+      }
+      play(type) {
+        if (!this.inicialitzat || !this.contextAudio) {
+          this.init();
+          if (!this.inicialitzat) return;
+        }
+        const now = this.contextAudio.currentTime;
+        let osc, gain, noise, filt, bufSize, bufData;
+        switch(type) {
+          case 'fire':
+            osc = this.contextAudio.createOscillator();
+            gain = this.contextAudio.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(700, now);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            osc.connect(gain); gain.connect(this.contextAudio.destination);
+            osc.start(now); osc.stop(now + 0.1);
+            break;
+          case 'explosion':
+            bufSize = this.contextAudio.sampleRate * 0.4;
+            const buf = this.contextAudio.createBuffer(1, bufSize, this.contextAudio.sampleRate);
+            bufData = buf.getChannelData(0);
+            for (let i = 0; i < bufSize; i++) bufData[i] = Math.random() * 2 - 1;
+            noise = this.contextAudio.createBufferSource();
+            noise.buffer = buf;
+            filt = this.contextAudio.createBiquadFilter();
+            filt.type = 'lowpass';
+            filt.frequency.setValueAtTime(1200, now);
+            filt.frequency.exponentialRampToValueAtTime(150, now + 0.4);
+            gain = this.contextAudio.createGain();
+            gain.gain.setValueAtTime(0.5, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+            noise.connect(filt); filt.connect(gain); gain.connect(this.contextAudio.destination);
+            noise.start(now); noise.stop(now + 0.4);
+            break;
+          default:
+            return;
+        }
+      }
+    }
+
+    class Tanc {
+      constructor(x, color) {
+        this.x = x; this.health = 100;
+        this.el = document.createElement('div');
+        this.el.className = 'tanc';
+        this.el.style.left = `${x}px`;
+        this.el.style.background = color;
+        this.el.innerHTML = `
+          <div class="cos-tanc"><div class="vida-tanc"></div></div>
+          <div class="canon-tanc"></div>
+        `;
+        document.getElementById('contenidor-joc').appendChild(this.el);
+        this.canon = this.el.querySelector('.canon-tanc');
+        this.vidaEl = this.el.querySelector('.vida-tanc');
+        this.updateHealth();
+      }
+      setAngle(a) {
+        this.canon.style.transform = `rotate(${-a}deg)`;
+      }
+      updateHealth() {
+        this.vidaEl.style.height = `${this.health}%`;
+        let color;
+        if (this.health > 75) color = '#4CAF50';
+        else if (this.health > 50) color = '#FFEB3B';
+        else if (this.health > 25) color = '#FFC107';
+        else if (this.health > 0) color = '#FF5722';
+        else color = '#FF0000';
+        this.vidaEl.style.background = color;
+      }
+      getHitbox() {
+        return { x: this.el.offsetLeft, y: this.el.offsetTop, width: this.el.clientWidth, height: this.el.clientHeight };
+      }
+      destroy() {
+        this.el.remove();
+      }
+      getCannonTip() {
+        const angle = parseInt(document.getElementById('slider-angle').value) || 0;
+        const rad = -angle * Math.PI/180;
+        const len = this.canon.offsetWidth || 40;
+        const h = this.canon.offsetHeight || 8;
+        const px = this.el.offsetLeft + this.canon.offsetLeft;
+        const py = this.el.offsetTop + this.canon.offsetTop + h/2;
+        return { x: px + len * Math.cos(rad), y: py + len * Math.sin(rad) };
+      }
+    }
+
+    class Bala {
+      constructor(x, y, angle, power, wind) {
+        this.x=x; this.y=y; this.angle=angle; this.power=power; this.wind=wind;
+        this.vel = this.calcVelocity(); this.active = true;
+        this.el = document.createElement('div'); this.el.className = 'bala';
+        document.getElementById('contenidor-joc').appendChild(this.el);
+        this.updateEl();
+      }
+      calcVelocity() {
+        const r = this.angle * Math.PI/180;
+        const speed = VELOCITAT_BASE_BALA + (this.power/100)*ESCALA_POTENCIA_BALA;
+        return { x: Math.cos(r)*speed, y: -Math.sin(r)*speed };
+      }
+      update(dt) {
+        if (!this.active) return;
+        dt = Math.min(dt, 0.05);
+        this.vel.y += GRAVETAT;
+        const sp = Math.hypot(this.vel.x, this.vel.y);
+        const rf = RESISTENCIA_AIRE * sp * sp;
+        if (sp > 0.01) {
+          this.vel.x -= (rf * this.vel.x/sp)*dt;
+          this.vel.y -= (rf * this.vel.y/sp)*dt;
+        }
+        this.vel.x += this.wind*dt;
+        this.x += this.vel.x; this.y += this.vel.y;
+        this.updateEl();
+        const H = document.getElementById('contenidor-joc').clientHeight;
+        if (this.x < -10 || this.x > document.getElementById('contenidor-joc').clientWidth+10 || this.y > H+10) this.destroy();
+      }
+      updateEl() { this.el.style.left = `${this.x - this.el.offsetWidth/2}px`; this.el.style.top = `${this.y - this.el.offsetHeight/2}px`; }
+      destroy() { if (!this.active) return; this.active=false; this.el.remove(); }
+    }
+
+    class Objectiu {
+      constructor(x) { this.x=x; this.active=true; this.el=document.createElement('div'); this.el.className='objectiu'; this.el.style.left=`${x}px`;document.getElementById('contenidor-joc').appendChild(this.el);}      getHitbox(){return {x:this.el.offsetLeft,y:this.el.offsetTop,width:this.el.clientWidth,height:this.el.clientHeight}}      destroy(){this.active=false;this.el.remove();}
+    }
+
+    class Explosio {
+      constructor(x,y){this.el=document.createElement('div');this.el.className='explosio';this.el.style.left=`${x-25}px`;this.el.style.top=`${y-25}px`;document.getElementById('contenidor-joc').appendChild(this.el);setTimeout(()=>this.el.remove(),500);}    }
+
+    // Referències DOM
+    const panelConfig = document.getElementById('panel-configuracio');
+    const contenedorJoc = document.getElementById('contenidor-joc');
+    const panelControles = document.getElementById('panel-controles');
+    let btnIniciar = document.getElementById('iniciar-btn');
+    let municioInput = document.getElementById('municio-input');
+    let mostraPuntuacio = document.getElementById('mostra-puntuacio');
+    let mostraDisparos  = document.getElementById('mostra-disparos');
+    let tempDisplay     = document.getElementById('mostra-temporitzador');
+    let ventDisplay     = document.getElementById('mostra-vent');
+    let angleSlider     = document.getElementById('slider-angle');
+    let potenciaSlider  = document.getElementById('slider-potencia');
+    let angleValue      = document.getElementById('valor-angle');
+    let potValue        = document.getElementById('valor-potencia');
+    let btnDisparar     = document.getElementById('boton-disparar');
+    let finalScreen     = document.getElementById('final-joc');
+    let finalScore      = document.getElementById('puntuacio-final');
+    let btnReiniciar    = document.getElementById('reiniciar-btn');
+    
+    let gestorAudio, tancJugador;
+    let balas=[], objectius=[];
+    let puntuacio=0, disparos=0, maxDisparos=MUNICIO_DEFECTE;
+    let tempsRestant=TEMPS_INICIAL, jocActiu=false;
+    let ventBase=0, ultima=0;
+    let rafId, intervalTemps;
+
+    function initJoc() {
+      // Reset controls
+      angleSlider.replaceWith(angleSlider.cloneNode(true)); potenciaSlider.replaceWith(potenciaSlider.cloneNode(true)); btnDisparar.replaceWith(btnDisparar.cloneNode(true));
+      angleSlider = document.getElementById('slider-angle'); potenciaSlider = document.getElementById('slider-potencia'); btnDisparar=document.getElementById('boton-disparar');
+
+      maxDisparos = parseInt(municioInput.value)||MUNICIO_DEFECTE; if (maxDisparos < MUNICIO_MIN || maxDisparos > MUNICIO_MAX){maxDisparos=MUNICIO_DEFECTE;municioInput.value=MUNICIO_DEFECTE;}
+      panelConfig.style.display='none'; contenedorJoc.style.display='block'; panelControles.style.display='flex';
+      if (!gestorAudio) gestorAudio=new GestorAudio();
+
+      puntuacio=0; disparos=0; tempsRestant=TEMPS_INICIAL; jocActiu=true;
+      balas.forEach(b=>b.destroy()); balas=[]; objectius.forEach(o=>o.destroy()); objectius=[];
+      document.querySelectorAll('.explosio').forEach(e=>e.remove());
+      if (tancJugador) tancJugador.destroy();
+      tancJugador = new Tanc(50,'#556B2F'); tancJugador.setAngle(parseInt(angleSlider.value));
+      creaObjectius(OBJECTIUS_PER_RONDA);
+      ventBase = Math.random()*2-1; actualitzaVent();
+      actualitzaPuntuacio(); actualitzaDisparos(); actualitzaTemporitzador(); tancJugador.updateHealth();
+      btnDisparar.disabled=false;
+      setupControls(); clearInterval(intervalTemps); intervalTemps=setInterval(actualitzaTemps,1000);
+      ultima=performance.now(); if(rafId) cancelAnimationFrame(rafId); loopJoc(ultima);
+    }
+
+    function setupControls() {
+      angleSlider.addEventListener('input',e=>controlInput(e)); potenciaSlider.addEventListener('input',e=>controlInput(e)); btnDisparar.addEventListener('click', disparar);
+      document.removeEventListener('keydown',keyDown);
+      document.addEventListener('keydown',keyDown);
+      controlInput({target:angleSlider});controlInput({target:potenciaSlider});
+    }
+    function controlInput(e) {
+      if (!tancJugador) return;
+      const val=parseInt(e.target.value);
+      if (e.target.id==='slider-angle') { angleValue.textContent = `${val}°`; tancJugador.setAngle(val); }
+      else { potValue.textContent = `${val}%`; }
+    }
+    function keyDown(e) {
+      if (!jocActiu) return;
+      let s,step;
+      switch(e.key){ case 'ArrowUp':s=angleSlider;step=1;break;case 'ArrowDown':s=angleSlider;step=-1;break;case 'ArrowRight':s=potenciaSlider;step=2;break;case 'ArrowLeft':s=potenciaSlider;step=-2;break;case ' ':case 'Enter':e.preventDefault();disparar();return;default:return;}
+      e.preventDefault();let cur=parseInt(s.value),nxt=Math.max(parseInt(s.min),Math.min(parseInt(s.max),cur+step));s.value=nxt;s.dispatchEvent(new Event('input'));
+    }
+
+    function creaObjectius(n) {
+      objectius.forEach(o=>o.destroy()); objectius=[];
+      const W=contenedorJoc.clientWidth;
+      const edge = tancJugador.el.offsetLeft + tancJugador.el.clientWidth;
+      const minX = edge+100, maxX = W-60;
+      if (minX >= maxX) return;
+      for(let i=0;i<n;i++){ let x,tries=0;
+        do { x = Math.random()*(maxX-minX)+minX;tries++; } while(objectius.some(o=>Math.abs(o.x-x)<o.el.clientWidth+10) && tries<10);
+        objectius.push(new Objectiu(x));
+      }
+    }
+
+    function disparar() {
+      if (!jocActiu) return;
+      if (disparos>=maxDisparos) return;
+      const start = tancJugador.getCannonTip(); const a = parseInt(angleSlider.value), p = parseInt(potenciaSlider.value);
+      const windEff = ventBase * FACTOR_VENT;
+      balas.push(new Bala(start.x, start.y, a, p, windEff));
+      gestorAudio.play('fire'); disparos++; actualitzaDisparos(); if(disparos>=maxDisparos) btnDisparar.disabled=true;
+    }
+
+    function comprovaCol·lisions() {
+      const ground = contenedorJoc.clientHeight - ALTURA_TERRENY;
+      for(let i=balas.length-1;i>=0;i--){ const b=balas[i]; if(!b.active) continue;
+        const pos={x:b.x,y:b.y}, r=b.el.offsetWidth/2;
+        // Col·lisions amb terreny
+        if(pos.y + r >= ground) { new Explosio(pos.x, ground); b.destroy(); continue; }
+        // Col·lisions amb objectius
+        let hit=false;
+        for(let j=objectius.length-1;j>=0;j--){ const o=objectius[j]; if(!o.active) continue;
+          const h=o.getHitbox();
+          if(pos.x+r>h.x && pos.x-r<h.x+h.width && pos.y+r>h.y && pos.y-r<h.y+h.height){ new Explosio(pos.x,pos.y); o.destroy(); b.destroy(); puntuacio+=PUNT_PER_OBJECTIU; actualitzaPuntuacio(); hit=true;break; }
+        }
+        if(hit) {
+          if(objectius.every(o=>!o.active)){
+            setTimeout(()=>creaObjectius(OBJECTIUS_PER_RONDA),500);
+          }
+        }
+      }
+      balas = balas.filter(b=>b.active);
+    }
+
+    function actualitzaPuntuacio()       { mostraPuntuacio.textContent = `Puntuació: ${puntuacio}`; }
+    function actualitzaDisparos()       { mostraDisparos.textContent = `Disparos: ${disparos}/${maxDisparos}`; }
+    function actualitzaTemporitzador(){ tempDisplay.textContent = `Temps: ${tempsRestant}s`; }
+    function actualitzaVent() {
+      const w = (ventBase * 10).toFixed(1);
+      const dir = ventBase>0.05?'→':ventBase< -0.05?'←':'';
+      ventDisplay.innerHTML = `Vent: ${dir} ${Math.abs(w)} m/s`;
+    }
+    function actualitzaTemps() { if(!jocActiu) return; tempsRestant--; actualitzaTemporitzador(); if(tempsRestant<=0) finalitzar(); }
+
+    function loopJoc(t) {
+      if(!jocActiu) return;
+      const dt = (t - ultima)/1000; ultima = t;
+      balas.forEach(b=>b.update(dt)); comprovaCol·lisions(); rafId = requestAnimationFrame(loopJoc);
+    }
+
+    function finalitzar() {
+      jocActiu=false; clearInterval(intervalTemps); cancelAnimationFrame(rafId); btnDisparar.disabled=true;
+      finalScore.textContent = `Puntuació: ${puntuacio}`;
+      finalScreen.style.display='block';
+    }
+
+    function reiniciar() {
+      finalScreen.style.display='none'; panelConfig.style.display='block'; contenedorJoc.style.display='none'; panelControles.style.display='none';
+      if(gestorAudio) gestorAudio = null;
+    }
+
+    btnIniciar.addEventListener('click', initJoc);
+    btnReiniciar.addEventListener('click', reiniciar);
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "preguntas": [
+    {
+      "texto": "Sòcrates va ser mestre de Plató.",
+      "respuesta": true
+    },
+    {
+      "texto": "Sòcrates va deixar escrits filosòfics importants.",
+      "respuesta": false
+    },
+    {
+      "texto": "Sòcrates va ser condemnat a mort per corrupció de la joventut i per impietat.",
+      "respuesta": true
+    },
+    {
+      "texto": "Sòcrates va néixer a Atenes al segle V aC.",
+      "respuesta": true
+    },
+    {
+      "texto": "Sòcrates creia que la saviesa consistia a reconèixer la pròpia ignorància.",
+      "respuesta": true
+    },
+    {
+      "texto": "L'oracle de Delfos va declarar que Sòcrates era l'home més savi d'Atenes.",
+      "respuesta": true
+    },
+    {
+      "texto": "La principal font de coneixement sobre Sòcrates prové dels diàlegs escrits per Aristòtil.",
+      "respuesta": false
+    }
+  ]
+}

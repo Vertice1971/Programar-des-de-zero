@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Realisme en Literatura 4t d'ESO</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; background-color: #f5f8ff; }
+        .header-info { font-size: 0.9em; color: #555; margin-bottom: 5px; line-height: 1.2; }
+        .question-container { display: none; padding: 20px; border: 1px solid #ccc; border-radius: 10px; max-width: 600px; margin: 20px auto; background: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .option { display: block; padding: 10px; margin: 10px 0; border: 2px solid #ddd; border-radius: 5px; cursor: pointer; transition: background 0.3s, transform 0.2s; }
+        .option:hover { background: #e0ebff; transform: scale(1.05); }
+        .correct { background: #c8e6c9; border-color: green; }
+        .incorrect { background: #ffcdd2; border-color: red; }
+        #start-btn, #restart-btn, #next-btn { margin-top: 20px; padding: 10px 15px; background: #007BFF; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        #restart-btn { background: #28a745; }
+        #next-btn { position: fixed; right: 20px; top: 30%; display: none; }
+        #info-container { margin-top: 20px; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <div class="header-info">
+        <div>Tomàs Cuesta</div>
+        <div>IES Joan de la Cierva</div>
+        <a href="https://www.amazon.es/dp/B0F61P4TXK" target="_blank" style="text-decoration: underline;">
+            Programar des de zero
+        </a>
+    </div>
+    <h1>Test de Realisme en Literatura 4t d'ESO</h1>
+    <div id="info-container"></div>
+    <button id="start-btn">Començar prova</button>
+    <div id="quiz-container" class="question-container"></div>
+    <button id="next-btn">Següent</button>
+    <button id="restart-btn" style="display:none;">Reiniciar</button>
+
+    <script>
+        const data = {
+            "preguntas": [
+                // -- 30% sobre literatura catalana (10 de 34) --
+                {
+                    "texto": "Quin autor català es considera pioner del Realisme en la literatura catalana?",
+                    "opciones": { "a": "Narcís Oller", "b": "Víctor Català", "c": "Joan Maragall" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina novel·la de Narcís Oller sovint es considera la primera realista en català?",
+                    "opciones": { "a": "La papallona", "b": "Solitud", "c": "La febre d'or" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina obra de Víctor Català (Caterina Albert) és un exemple de Natural·lisme català?",
+                    "opciones": { "a": "Solitud", "b": "La terra", "c": "Un clau al cor" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Amb quin heterònim va signar Caterina Albert les seves històries naturalistes?",
+                    "opciones": { "a": "Víctor Català", "b": "Maria Antònia Salvà", "c": "Josep Carner" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Durant quin període cronològic es situa principalment el Realisme català?",
+                    "opciones": { "a": "1880–1900", "b": "1850–1870", "c": "1900–1920" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quin tema és característic del Realisme en les novel·les catalanes de final de segle XIX?",
+                    "opciones": { "a": "Crítica de la burgesia urbana", "b": "Exaltació del món rural", "c": "Elements fantàstics" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina novel·la de Narcís Oller retrata amb detall la burgesia barcelonina?",
+                    "opciones": { "a": "La febre d'or", "b": "La papallona", "c": "Les històries naturals" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Qui va escriure la novel·la naturalista 'Solitud'?",
+                    "opciones": { "a": "Caterina Albert", "b": "Mercè Rodoreda", "c": "Montserrat Roig" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quin recurs estilístic utilitza Víctor Català per expressar la psicologia dels personatges?",
+                    "opciones": { "a": "Monòleg interior", "b": "Hipèrbata", "c": "Aliteració" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "En quin gènere literari destaca Àngel Guimerà, contemporani del Realisme català?",
+                    "opciones": { "a": "Teatre", "b": "Poesia lírica", "c": "Assaig filosòfic" },
+                    "respuesta": "a"
+                },
+
+                // -- 70% preguntes generals sobre Realisme i Natural·lisme (24 de 34) --
+                {
+                    "texto": "Quin moviment literari va sorgir al segle XIX en resposta als canvis de la Revolució Industrial?",
+                    "opciones": { "a": "Realismo literari", "b": "Romanticisme", "c": "Modernisme" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quin mètode van aplicar els autors realistes per descriure la societat?",
+                    "opciones": { "a": "Mètode científic", "b": "Intuïció artística", "c": "Anàlisi filosòfic" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina és la característica principal de la narrativa realista?",
+                    "opciones": { "a": "Descripció minuciosa i objectiva", "b": "Estructura fragmentada", "c": "Ús de fantasia" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Com es representen sovint els personatges en la novel·la realista?",
+                    "opciones": { "a": "Com a gent comuna", "b": "Com a herois mítics", "c": "Com a figures històriques" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina funció tenen els personatges secundaris en la crítica social realista?",
+                    "opciones": { "a": "Sàtira o crítica social", "b": "Adorns sense importància", "c": "Ideals romàntics" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina tècnica narrativa preval en la novel·la realista?",
+                    "opciones": { "a": "Narrador omniscient en 3a persona", "b": "Narrador en 1a persona", "c": "Monòleg interior" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Per a què serveix la descripció detallada en el Realisme?",
+                    "opciones": { "a": "Versemblança de la realitat", "b": "Crear ambient fantàstic", "c": "Trencar la temporalitat" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quin tema és recurrent en la novel·la realista?",
+                    "opciones": { "a": "Anticlericalisme", "b": "Exaltació de la natura", "c": "Busca del sobrenatural" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quin conflicte social aborda la novel·la realista?",
+                    "opciones": { "a": "Xoc entre tradició i progrés", "b": "Lluita bé i mal", "c": "Enfrontament entre regnes" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Què és una novel·la de tesi?",
+                    "opciones": { "a": "Exposa una postura social", "b": "Entreteniment sense missatge", "c": "Relat sense estructura" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quin autor espanyol és exponent del Realisme literari?",
+                    "opciones": { "a": "Benito Pérez Galdós", "b": "Federico García Lorca", "c": "Miguel de Cervantes" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina obra de Galdós és una novel·la de tesi?",
+                    "opciones": { "a": "La Fontana de Oro", "b": "La desheredada", "c": "Fortunata i Jacinta" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quin autor francès va influir els realistes amb 'La Comédie Humaine'?",
+                    "opciones": { "a": "Honoré de Balzac", "b": "Gustave Flaubert", "c": "Victor Hugo" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina novel·la de Flaubert va ser model per 'La Regenta'?",
+                    "opciones": { "a": "Madame Bovary", "b": "Nana", "c": "Salammbô" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina obra de Dickens representa el Realisme anglès?",
+                    "opciones": { "a": "David Copperfield", "b": "Oliver Twist", "c": "Grandes Esperanzas" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina novel·la de Dostoievski s’associa al Realisme rus?",
+                    "opciones": { "a": "Crim i càstig", "b": "Els germans Karamàzov", "c": "L’idiota" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina diferència hi ha entre Realisme i Natural·lisme?",
+                    "opciones": { "a": "Aplicació del mètode científic", "b": "Personatges secundaris", "c": "Ús de diàlegs" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina corrent deriva del Natural·lisme?",
+                    "opciones": { "a": "Natural·lisme extrem", "b": "Modernisme", "c": "Simbolisme" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Segons el Natural·lisme, de què depèn el comportament humà?",
+                    "opciones": { "a": "Entorn i biologia", "b": "Voluntat individual", "c": "Intervenció divina" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Com són els personatges naturalistes?",
+                    "opciones": { "a": "Determinats per l'entorn", "b": "Idealitzats", "c": "Heroics" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina intenció tenen les novel·les naturalistes?",
+                    "opciones": { "a": "Denunciar injustícies", "b": "Enaltir virtuts burgesses", "c": "Romantitzar la vida" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina característica formal té el Natural·lisme?",
+                    "opciones": { "a": "Descripció objectiva i detallada", "b": "Narrativa fragmentada", "c": "Llenguatge poètic" },
+                    "respuesta": "a"
+                },
+                {
+                    "texto": "Quina característica NO és típica del Natural·lisme?",
+                    "opciones": { "a": "Enfatitzar negatiu", "b": "Idealitzar personatges", "c": "Ús lèxic científic" },
+                    "respuesta": "b"
+                }
+            ]
+        };
+
+        let preguntas = data.preguntas;
+        let preguntasElegidas = [];
+        let preguntaActual = 0;
+        let correctas = 0;
+
+        const infoContainer = document.getElementById('info-container');
+        const startBtn = document.getElementById('start-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            infoContainer.innerHTML = `<p>La prova conté <strong>${preguntas.length}</strong> preguntes.</p>`;
+            startBtn.style.display = 'inline-block';
+        });
+
+        startBtn.addEventListener('click', () => {
+            let num = prompt(`Quantes preguntes vols fer? (1-${preguntas.length})`, preguntas.length);
+            num = parseInt(num);
+            if (isNaN(num) || num < 1 || num > preguntas.length) {
+                alert('Nombre no vàlid. Es jugaran totes les preguntes.');
+                num = preguntas.length;
+            }
+            preguntasElegidas = shuffle([...preguntas]).slice(0, num);
+            startBtn.style.display = 'none';
+            infoContainer.innerHTML = '';
+            mostrarPregunta();
+        });
+
+        function mostrarPregunta() {
+            if (preguntaActual < preguntasElegidas.length) {
+                quizContainer.innerHTML = '';
+                quizContainer.style.display = 'block';
+                nextBtn.style.display = 'none';
+
+                const p = preguntasElegidas[preguntaActual];
+                const h2 = document.createElement('h2');
+                h2.textContent = p.texto;
+                quizContainer.appendChild(h2);
+
+                shuffle(Object.entries(p.opciones).map(([k,v]) => ({ key:k, texto:v })))
+                    .forEach(op => {
+                        const div = document.createElement('div');
+                        div.className = 'option';
+                        div.textContent = op.texto;
+                        div.dataset.val = op.key;
+                        div.addEventListener('click', () => validar(div, p.respuesta));
+                        quizContainer.appendChild(div);
+                    });
+            } else {
+                quizContainer.innerHTML = `<h2>Prova finalitzada!</h2><p>Has encertat ${correctas} de ${preguntasElegidas.length} preguntes.</p>`;
+                nextBtn.style.display = 'none';
+                restartBtn.style.display = 'inline-block';
+            }
+        }
+
+        function validar(elem, resp) {
+            document.querySelectorAll('.option').forEach(o => o.style.pointerEvents = 'none');
+            if (elem.dataset.val === resp) {
+                elem.classList.add('correct');
+                correctas++;
+            } else {
+                elem.classList.add('incorrect');
+                const correcto = document.querySelector(`.option[data-val='${resp}']`);
+                if (correcto) correcto.classList.add('correct');
+            }
+            nextBtn.style.display = 'inline-block';
+        }
+
+        nextBtn.addEventListener('click', () => {
+            preguntaActual++;
+            mostrarPregunta();
+        });
+        restartBtn.addEventListener('click', () => {
+            location.reload();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Endevina el número</title>
+  <style>
+    :root {
+      --bg: #f0f0f0;
+      --card: #fff;
+      --primary: #4a90e2;
+      --text: #333;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1em;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 0.5rem;
+      padding: 2rem;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 0.75em;
+      margin: 0.5em 0;
+      border: 1px solid #ccc;
+      border-radius: 0.25rem;
+      font-size: 1rem;
+    }
+    button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.75em 1.5em;
+      font-size: 1rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 0.5em;
+    }
+    button:hover {
+      background: #357abd;
+    }
+    #resultat {
+      margin-top: 1em;
+      font-weight: bold;
+    }
+    #comptador {
+      margin-top: 0.5em;
+      color: #666;
+    }
+    .hidden {
+      display: none;
+    }
+    footer {
+      margin-top: 2em;
+      font-size: 0.8em;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Autor: Tomás Cuesta | tomcue@iesjuandelacierva.com -->
+
+<div class="card">
+
+  <h1>Endevina el número</h1>
+
+  <div id="menuMode">
+    <p>Selecciona un mode de joc:</p>
+    <button onclick="seleccionarMode('facil')">Mode Fàcil</button>
+    <button onclick="seleccionarMode('dificil')">Mode Difícil</button>
+  </div>
+
+  <div id="configuracio" class="hidden">
+    <p>Tria un número de l'1 al 100 i quants intents vols:</p>
+    <label for="intents">Intents (1–10):</label>
+    <input type="number" id="intents" min="1" max="10" value="5"/>
+    <button id="btnComençar">Començar joc</button>
+  </div>
+
+  <div id="zonaJoc" class="hidden">
+    <p>Introdueix el teu número:</p>
+    <input type="number" id="entrada" min="1" max="100"/>
+    <button id="btnProvar">Provar</button>
+    <div id="resultat"></div>
+    <div id="comptador"></div>
+    <button id="btnReiniciar" class="hidden">Tornar al menú</button>
+  </div>
+
+  <footer>Tomás Cuesta</footer>
+</div>
+
+<audio id="soEncert" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<audio id="soError" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+
+<script>
+(() => {
+  let secret, maxIntents, usats, diffAnterior, acabat, mode;
+
+  const menuMode     = document.getElementById('menuMode');
+  const configuracio = document.getElementById('configuracio');
+  const zonaJoc      = document.getElementById('zonaJoc');
+  const btnComençar  = document.getElementById('btnComençar');
+  const btnProvar    = document.getElementById('btnProvar');
+  const btnReiniciar = document.getElementById('btnReiniciar');
+  const resultat     = document.getElementById('resultat');
+  const comptador    = document.getElementById('comptador');
+  const entrada      = document.getElementById('entrada');
+  const inputIntents = document.getElementById('intents');
+  const soOk         = document.getElementById('soEncert');
+  const soErr        = document.getElementById('soError');
+
+  window.seleccionarMode = function(tipo) {
+    mode = tipo;
+    menuMode.classList.add('hidden');
+    configuracio.classList.remove('hidden');
+  }
+
+  btnComençar.addEventListener('click', () => {
+    secret     = Math.floor(Math.random() * 100) + 1;
+    maxIntents = +inputIntents.value;
+    usats      = 0;
+    diffAnterior = null;
+    acabat     = false;
+
+    resultat.textContent = '';
+    comptador.textContent = `Intent ${1} de ${maxIntents}`;
+    entrada.value = '';
+    zonaJoc.classList.remove('hidden');
+    configuracio.classList.add('hidden');
+
+    inputIntents.disabled = true;
+    btnComençar.disabled = true;
+    btnProvar.disabled = false;
+    btnReiniciar.classList.add('hidden');
+  });
+
+  btnProvar.addEventListener('click', () => {
+    if (acabat) return;
+
+    const val = parseInt(entrada.value, 10);
+    if (!val || val < 1 || val > 100) {
+      resultat.textContent = 'Introdueix un número vàlid entre 1 i 100.';
+      return;
+    }
+
+    usats++;
+    let msg = '';
+
+    if (val === secret) {
+      msg = `✅ Correcte! Era ${secret}. Endevinat en ${usats} intent(s).`;
+      soOk.play();
+      acabarJoc();
+    } else {
+      soErr.play();
+
+      if (mode === 'facil') {
+        msg = val < secret ? 'El número és més alt.' : 'El número és més baix.';
+      } else if (mode === 'dificil') {
+        const diff = Math.abs(val - secret);
+        if (usats === 1) {
+          msg = val < secret ? 'Més alt.' : 'Més baix.';
+        } else {
+          msg = diff < diffAnterior ? 'T’hi acostes més que abans!' :
+                diff > diffAnterior ? 'T’allunyes més que abans.' :
+                'Mateixa distància que abans.';
+        }
+        diffAnterior = diff;
+      }
+    }
+
+    resultat.textContent = msg;
+
+    if (!acabat && usats >= maxIntents) {
+      resultat.textContent += ` Has perdut. Era ${secret}.`;
+      soErr.play();
+      acabarJoc();
+    }
+
+    if (!acabat) {
+      comptador.textContent = `Intent ${usats + 1} de ${maxIntents}`;
+    }
+  });
+
+  btnReiniciar.addEventListener('click', () => {
+    zonaJoc.classList.add('hidden');
+    menuMode.classList.remove('hidden');
+    configuracio.classList.add('hidden');
+
+    inputIntents.disabled = false;
+    btnComençar.disabled = false;
+    resultat.textContent = '';
+    comptador.textContent = '';
+    entrada.value = '';
+  });
+
+  function acabarJoc() {
+    acabat = true;
+    btnProvar.disabled = true;
+    comptador.textContent = 'Joc acabat.';
+    btnReiniciar.classList.remove('hidden');
+  }
+})();
+</script>
+
+</body>
+</html>
