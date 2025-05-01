@@ -21,3 +21,13 @@
 - [99 – Simón diu](https://vertice1971.github.io/Programar-des-de-zero/99Sim%C3%B3.html)
 - [99 – Tanc artiller](https://vertice1971.github.io/Programar-des-de-zero/99Tanc.html)
 - [99 – Tres en ratlla](https://vertice1971.github.io/Programar-des-de-zero/99TresEnRatlla.html)
+
+## REPTES DE CÒDIC RESOLTS
+
+
+
+
+
+## AIXÒ EM SONA – BETA
+
+
