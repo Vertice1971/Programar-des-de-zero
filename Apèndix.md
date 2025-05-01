@@ -24,6 +24,19 @@
 
 ## REPTES DE CÒDIC RESOLTS
 
+- [12 – Endevina el número](https://vertice1971.github.io/Programar-des-de-zero/Reptes/12Endevinaeln%C3%BAmero.html)
+- [13 – Memòria visual](https://vertice1971.github.io/Programar-des-de-zero/Reptes/13Mem%C3%B2riavisual.html)
+- [13b – Joc de memòria (anglès)](https://vertice1971.github.io/Programar-des-de-zero/Reptes/13bMem%C3%B2riaAngl%C3%A8s.html)
+- [13b – Joc de memòria (francès)](https://vertice1971.github.io/Programar-des-de-zero/Reptes/13bMem%C3%B2riaFranc%C3%A8s.html)
+- [14 – Penjat adaptat](https://vertice1971.github.io/Programar-des-de-zero/Reptes/14Penjat.html)
+- [15 – Clic ràpid](https://vertice1971.github.io/Programar-des-de-zero/Reptes/15Clic.html)
+- [16 – Simó avançat](https://vertice1971.github.io/Programar-des-de-zero/Reptes/16Sim%C3%B3.html)
+- [17 – Tanc (repte)](https://vertice1971.github.io/Programar-des-de-zero/Reptes/17Tanc.html)
+- [18 – Tres en ratlla (repte)](https://vertice1971.github.io/Programar-des-de-zero/Reptes/18TresenRatlla.html)
+- [19 – Test Literatura del Realisme](https://vertice1971.github.io/Programar-des-de-zero/Reptes/19Test%20Literatura%20Realisme.html)
+- [20 – Motor de test simple](https://vertice1971.github.io/Programar-des-de-zero/Reptes/20Motor%20test.html)
+- [21 – Motor de test múltiple (v2)](https://vertice1971.github.io/Programar-des-de-zero/Reptes/21Motor%20Test%20M%C3%BAltiple%20v2.html)
+
 
 
 
