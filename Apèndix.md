@@ -42,5 +42,4 @@
 
 
 ## AIXÒ EM SONA – BETA
-
-
+- [Index del projecte “Això em sona"](https://vertice1971.github.io/Programar-des-de-zero/aixó-em-sona/Beta/index.html)
