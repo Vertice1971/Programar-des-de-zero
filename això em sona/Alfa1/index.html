@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Això em sona</title>
+  <link rel="stylesheet" href="css/estil.css" />
+</head>
+<body>
+
+  <!-- MENÚ PRINCIPAL -->
+  <div id="menu">
+    <h1>Això em sona</h1>
+    <button class="boto-menu" onclick="mostrarSeccio('joc')">Jugar</button>
+    <button class="boto-menu" onclick="mostrarSeccio('retallador')">Retallar MP3</button>
+  </div>
+
+  <!-- SECCIÓ DEL JOC -->
+  <div id="joc" class="seccio">
+    <!-- Aquí es carregarà el joc més endavant -->
+    <h2>Joc pròximament...</h2>
+    <button onclick="tornarAlMenu()">Tornar al menú</button>
+  </div>
+
+  <!-- SECCIÓ DEL RETALLADOR -->
+  <div id="retallador" class="seccio retallador">
+    <h2>Retallador de MP3</h2>
+    <div class="camp">
+      <label for="fileInput">Fitxer MP3:</label>
+      <input type="file" id="fileInput" accept="audio/mpeg" />
+    </div>
+    <div class="camp temps">
+      <div>
+        <label>Inici (mm:ss):</label>
+        <input type="number" id="iniciMin" min="0" value="0" />
+        <span>:</span>
+        <input type="number" id="iniciSeg" min="0" max="59" value="0" />
+      </div>
+      <div>
+        <label>Final (mm:ss):</label>
+        <input type="number" id="finalMin" min="0" value="0" />
+        <span>:</span>
+        <input type="number" id="finalSeg" min="0" max="59" value="0" />
+      </div>
+    </div>
+    <div class="camp">
+      <label for="outputName">Nom de sortida:</label>
+      <input type="text" id="outputName" value="retall.mp3" />
+    </div>
+    <button id="botoRetallar" disabled>Retallar</button>
+    <div id="estat"></div>
+    <br />
+    <button onclick="tornarAlMenu()">Tornar al menú</button>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="js/retallador.js"></script>
+  <script>
+    function mostrarSeccio(id) {
+      document.getElementById('menu').style.display = 'none';
+      document.querySelectorAll('.seccio').forEach(sec => sec.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+      if (id === 'retallador' && typeof iniciarRetallador === 'function') {
+        iniciarRetallador();
+      }
+    }
+
+    function tornarAlMenu() {
+      document.querySelectorAll('.seccio').forEach(sec => sec.style.display = 'none');
+      document.getElementById('menu').style.display = 'flex';
+    }
+  </script>
+
+</body>
+</html>
