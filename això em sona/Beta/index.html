@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Això em sona</title>
+  <link rel="stylesheet" href="css/estil.css" />
+</head>
+<body>
+
+  <!-- MENÚ PRINCIPAL -->
+  <div id="menu">
+    <h1>Això em sona</h1>
+    <h2 style="font-size: 0.6rem;">Tomás Cuesta</h2>
+    <button class="boton-menu" onclick="mostrarSeccion('juego')">Jugar</button>
+    <button class="boton-menu" onclick="mostrarSeccion('cortador')">Retallar MP3</button>
+  </div>
+
+  <!-- SECCIÓ DEL JOC -->
+  <div id="juego" class="seccion">
+    <h2>Quina cançó és?</h2>
+
+    <!-- Botó per seleccionar carpeta al començament -->
+    <div id="seleccionCarpeta" class="field">
+      <button onclick="seleccionarCarpeta()">Selecciona una carpeta amb cançons</button>
+      <div id="numCanciones" style="text-align:center; margin-top: 10px;"></div>
+    </div>
+
+    <!-- Zona activa del joc -->
+    <div id="zonaJuego" style="display:none;">
+      <p id="infoTurno" style="text-align:center; font-weight:bold;"></p>
+      <audio id="audio" style="display: none;"></audio>
+
+      <div id="opciones" class="field">
+        <!-- Els botons de resposta s’afegeixen des de JS -->
+      </div>
+
+      <div id="temporizador" style="text-align:center; font-size: 1.2rem; font-weight: bold;"></div>
+      <div id="barraTiempoContenedor">
+        <div id="barraTiempo"></div>
+      </div>
+
+      <div id="resultado" style="text-align:center; font-size: 1.1rem; margin-top: 10px;"></div>
+      <div id="avisoSiguiente" style="text-align:center; margin-top: 10px;"></div>
+
+      <div id="marcador" style="text-align:center; margin-top: 20px;">
+        <p>Ronda: <span id="ronda">1</span></p>
+        <div id="puntuaciones">
+          <!-- Aquí es mostraran les puntuacions de cada jugador -->
+        </div>
+      </div>
+    </div>
+
+    <br />
+    <button onclick="volverAlMenu()">Torna al menú</button>
+  </div>
+
+  <!-- SECCIÓ DEL RETALLADOR -->
+  <div id="cortador" class="seccion cortador">
+    <h2>Retallador de MP3</h2>
+    <div class="field">
+      <label for="fileInput">Fitxer MP3:</label>
+      <input type="file" id="fileInput" accept="audio/mpeg" />
+    </div>
+    <div class="field time-inputs">
+      <div>
+        <label>Inici (mm:ss):</label>
+        <input type="number" id="startMin" min="0" value="0" />
+        <span>:</span>
+        <input type="number" id="startSec" min="0" max="59" value="0" />
+      </div>
+      <div>
+        <label>Final (mm:ss):</label>
+        <input type="number" id="endMin" min="0" value="0" />
+        <span>:</span>
+        <input type="number" id="endSec" min="0" max="59" value="0" />
+      </div>
+    </div>
+    <div class="field">
+      <label for="outputName">Nom de sortida:</label>
+      <input type="text" id="outputName" value="retall.mp3" />
+    </div>
+    <button id="cutButton" disabled>Retalla</button>
+    <div id="status"></div>
+    <br />
+    <button onclick="volverAlMenu()">Torna al menú</button>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="js/retallador.js"></script>
+  <script src="js/joc.js"></script>
+  <script>
+    function mostrarSeccion(id) {
+      document.getElementById('menu').style.display = 'none';
+      document.querySelectorAll('.seccion').forEach(sec => sec.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+      if (id === 'cortador' && typeof iniciarCortador === 'function') {
+        iniciarCortador();
+      }
+    }
+
+    function volverAlMenu() {
+      document.querySelectorAll('.seccion').forEach(sec => sec.style.display = 'none');
+      document.getElementById('menu').style.display = 'flex';
+
+      // Cancel·lar temporitzador i timeout si estan actius
+      if (typeof temporizadorId !== 'undefined' && temporizadorId) clearInterval(temporizadorId);
+      if (typeof timeoutResultadoId !== 'undefined' && timeoutResultadoId) clearTimeout(timeoutResultadoId);
+
+      // Netejar visualment
+      document.body.style.backgroundImage = '';
+      document.getElementById('resultado').textContent = '';
+      document.getElementById('avisoSiguiente').textContent = '';
+      document.getElementById('opciones').innerHTML = '';
+      document.getElementById('temporizador').textContent = '';
+      document.getElementById('puntuaciones').innerHTML = '';
+      document.getElementById('infoTurno').textContent = '';
+      document.getElementById('ronda').textContent = '1';
+      document.getElementById('seleccionCarpeta').style.display = 'block';
+      document.getElementById('zonaJuego').style.display = 'none';
+
+      // Reiniciar variables globals del joc
+      cancionesDisponibles = [];
+      cancionesFalladas = [];
+      cancionesUsadas.clear();
+
+      numRondas = 0;
+      rondaActual = 1;
+      jugadores = [];
+      jugadorActualIndice = 0;
+
+      $('#infoTurno').classList.remove('final-texto');
+      $('#resultado').classList.remove('final-texto');
+      $('#ronda').parentElement.classList.remove('final-puntuacion');
+    }
+  </script>
+
+</body>
+</html>
