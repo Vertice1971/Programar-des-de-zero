@@ -18,7 +18,7 @@ body {
   height: 100vh;
 }
 
-.seccion {
+.seccio {
   display: none;
   padding: 20px;
   max-width: 500px;
@@ -29,7 +29,7 @@ h1, h2 {
   text-align: center;
 }
 
-.boton-menu {
+.boto-menu {
   padding: 12px 20px;
   font-size: 1rem;
   border: none;
@@ -40,11 +40,11 @@ h1, h2 {
   margin: 8px 0;
 }
 
-.boton-menu:hover {
+.boto-menu:hover {
   background-color: #0056b3;
 }
 
-.field {
+.camp {
   margin-bottom: 15px;
 }
 
@@ -65,14 +65,14 @@ input[type="text"] {
   box-sizing: border-box;
 }
 
-.time-inputs > div {
+.temps > div {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
 }
 
-.time-inputs input[type="number"] {
+.temps input[type="number"] {
   width: 45%;
 }
 
@@ -92,7 +92,7 @@ button:disabled {
   cursor: not-allowed;
 }
 
-#status {
+#estat {
   margin-top: 10px;
   text-align: center;
   font-size: 0.9rem;
