@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <title>Hola personalitzat</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 20%;
+      font-size: 4rem;
+    }
+    .roig {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div id="salutació"></div>
+
+  <script>
+    document.getElementById("salutació").innerHTML = "Hola, món";
+
+    setTimeout(() => {
+      let nom = prompt("Com et dius?");
+      document.getElementById("salutació").innerHTML += "<br><span class='roig'>Hola, " + nom + "</span>";
+    }, 100); // espera 100 mil·lisegons abans de preguntar el nom
+  </script>
+</body>
+</html>

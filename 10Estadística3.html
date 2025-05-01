@@ -1,0 +1,419 @@
+<!--
+Tomás Cuesta
+tomcue@iesjuandelacierva.com
+-->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <title>Estadística 4t d'ESO</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 900px;
+      margin: 2em auto;
+      padding: 1em;
+      background-color: #f4f4f4;
+      border-radius: 10px;
+      position: relative;
+      padding-bottom: 3em; /* espai per al peu de pàgina */
+    }
+    label, input, button {
+      display: block;
+      margin: 0.5em 0;
+    }
+    .pantalla {
+      display: none;
+    }
+    .visible {
+      display: block;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5em;
+      text-align: center;
+    }
+    th {
+      background-color: #eee;
+    }
+    .moda {
+      background-color: #ffeb3b;
+      font-weight: bold;
+    }
+    .botons-taula {
+      margin-top: 1em;
+    }
+    #mitjana-valor {
+      margin-top: 0.5em;
+      font-weight: bold;
+      font-size: 1.1em;
+      white-space: pre-line;
+    }
+    .fila-total td {
+      font-weight: bold;
+      background-color: #e0f7fa;
+    }
+    #serie-mediana, #serie-cuartils {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1em;
+      margin: 1em 0;
+    }
+    .cara-dau {
+      text-align: center;
+      min-width: 50px;
+      padding: 0.5em;
+    }
+    .simbol-dau {
+      font-size: 2em;
+    }
+    .resaltar {
+      border: 2px solid red;
+      border-radius: 5px;
+    }
+    .resaltar-q1 {
+      border: 2px solid blue;
+      border-radius: 5px;
+    }
+    .resaltar-q3 {
+      border: 2px solid green;
+      border-radius: 5px;
+    }
+    .resaltar-percentil {
+      border: 2px dashed purple;
+      border-radius: 5px;
+    }
+    /* Peu de pàgina amb autor sempre visible */
+    #autor {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 0.8em;
+      color: #555;
+      background: rgba(244,244,244,0.8);
+      padding: 0.5em 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Pantalla inicial -->
+  <div id="pantalla-inici" class="pantalla visible">
+    <h1>Estadística 4t d'ESO</h1>
+    <label for="pares">Nombre de cares del dau:</label>
+    <input type="number" id="pares" min="2" value="6">
+    <label for="tirades">Nombre de tirades:</label>
+    <input type="number" id="tirades" min="1" value="100">
+    <button onclick="simular()">Llançar dau</button>
+    <div id="resultats"></div>
+    <button id="veureTaulaBtn" style="display:none;" onclick="mostrarTaula()">Veure taula de freqüències</button>
+  </div>
+
+  <!-- Pantalla de taula -->
+  <div id="pantalla-taula" class="pantalla">
+    <h2>Taula de freqüències</h2>
+    <div class="botons-taula">
+      <button onclick="toggleModa()">Veure moda</button>
+      <button onclick="toggleMitjana()">Veure la mitjana</button>
+      <button onclick="toggleVarianca()">Veure variança i desviació típica</button>
+      <button onclick="toggleCoefVariacio()">Veure coeficient de variació</button>
+      <button onclick="mostrarMediana()">Veure mediana</button>
+      <button onclick="mostrarCuartils()">Veure quarts i percentils</button>
+      <div id="mitjana-valor"></div>
+    </div>
+    <div id="taula-frequencies"></div>
+    <button onclick="tornar()">Tornar a simulació</button>
+  </div>
+
+  <!-- Pantalla de mediana -->
+  <div id="pantalla-mediana" class="pantalla">
+    <h2>Distribució per freqüències acumulades</h2>
+    <div id="serie-mediana"></div>
+    <button onclick="identificarMediana()">Identificar Mediana</button>
+    <div id="mediana-info" style="margin-top:1em; font-weight:bold;"></div>
+    <button onclick="tornarATaula()">Tornar a taula de freqüències</button>
+  </div>
+
+  <!-- Pantalla de quarts i percentils -->
+  <div id="pantalla-cuartils" class="pantalla">
+    <h2>Quarts i percentils</h2>
+    <div id="serie-cuartils"></div>
+    <button onclick="identificarCuartils()">Calcular Q1, Q2, Q3</button>
+    <label for="percentil">Introdueix percentil (1–99):</label>
+    <input type="number" id="percentil" min="1" max="99" value="30">
+    <button onclick="calcularPercentil()">Calcular percentil</button>
+    <div id="quartil-info" style="margin-top:1em; font-weight:bold;"></div>
+    <div id="percentil-info" style="margin-top:1em;"></div>
+    <button onclick="tornarATaulaDesDeCuartils()">Tornar a taula de freqüències</button>
+  </div>
+
+  <!-- Peu de pàgina -->
+  <div id="autor">
+    Tomás Cuesta<br>
+    IES Juan de la Cierva
+  </div>
+
+  <script>
+    // Variables globals
+    let dadesGuardades = [];
+    let estadistiques = {};
+    let modaVisible = false;
+    let mitjanaVisible = false;
+    let variancaVisible = false;
+    let coefVariacioVisible = false;
+
+    // PRNG xoshiro128**
+    function splitMix32(seed) {
+      let h = seed >>> 0;
+      return function() {
+        h += 0x9e3779b9;
+        let t = h;
+        t = Math.imul(t ^ (t >>> 16), 0x85ebca6b);
+        t = Math.imul(t ^ (t >>> 13), 0xc2b2ae35);
+        return (t ^ (t >>> 16)) >>> 0;
+      };
+    }
+    function xoshiro128ss(seedStr) {
+      let seed = 0;
+      for (let i = 0; i < seedStr.length; i++) {
+        seed = (seed * 31 + seedStr.charCodeAt(i)) >>> 0;
+      }
+      const sm = splitMix32(seed);
+      let s = [sm(), sm(), sm(), sm()];
+      function rotl(x, k) { return (x << k) | (x >>> (32 - k)); }
+      return function() {
+        const result = rotl(s[1] * 5, 7) * 9;
+        const t = s[1] << 9;
+        s[2] ^= s[0];
+        s[3] ^= s[1];
+        s[1] ^= s[2];
+        s[0] ^= s[3];
+        s[2] ^= t;
+        s[3] = rotl(s[3], 11);
+        return (result >>> 0) / 2**32;
+      };
+    }
+
+    // Simulació de tirades
+    function simular() {
+      const pares = parseInt(document.getElementById('pares').value);
+      const tirades = parseInt(document.getElementById('tirades').value);
+      if (isNaN(pares) || isNaN(tirades) || pares < 2 || tirades < 1) {
+        alert("Introdueix valors vàlids (mínim 2 cares i 1 tirada).");
+        return;
+      }
+      const semilla = (Date.now() + Math.random()).toString();
+      const rng = xoshiro128ss(semilla);
+      const resultats = [];
+      for (let i = 0; i < tirades; i++) {
+        resultats.push(Math.floor(rng() * pares) + 1);
+      }
+      dadesGuardades = resultats;
+      calcularEstadistiques(pares, resultats);
+      mostrarResultats(resultats);
+    }
+
+    function calcularEstadistiques(cares, dades) {
+      const total = dades.length;
+      const frecAbs = Array(cares).fill(0);
+      dades.forEach(v => frecAbs[v-1]++);
+      const frecAcum = [];
+      let acc = 0;
+      frecAbs.forEach(f => { acc += f; frecAcum.push(acc); });
+      const frecRel = frecAbs.map(f => f / total);
+      const frecAcumRel = frecRel.reduce((arr, fr, i) => {
+        if (i === 0) arr.push(fr);
+        else arr.push(arr[i-1] + fr);
+        return arr;
+      }, []);
+      estadistiques = {
+        frecAbs,
+        frecAcum,
+        frecRel,
+        frecAcumRel,
+        total
+      };
+    }
+
+    function mostrarResultats(res) {
+      document.getElementById('resultats').innerHTML =
+        `<h2>Resultats:</h2><p>${res.join(', ')}</p>`;
+      document.getElementById('veureTaulaBtn').style.display = 'block';
+    }
+
+    function mostrarTaula() {
+      modaVisible = mitjanaVisible = variancaVisible = coefVariacioVisible = false;
+      document.getElementById('mitjana-valor').innerText = '';
+      generarTaula();
+      document.getElementById('pantalla-inici').classList.remove('visible');
+      document.getElementById('pantalla-taula').classList.add('visible');
+    }
+    function tornar() {
+      document.getElementById('pantalla-taula').classList.remove('visible');
+      document.getElementById('pantalla-inici').classList.add('visible');
+    }
+
+    function generarTaula() {
+      const { frecAbs: fA, frecAcum: fAc, frecRel: fR, frecAcumRel: fAR, total: N } = estadistiques;
+      const modaMax = Math.max(...fA);
+      let sumXiFi = 0, sumFiXi2 = 0;
+      let html = `<table><thead><tr>
+        <th>Cara</th><th>fi</th><th>Fi</th><th>hi</th><th>Hi</th>
+        ${mitjanaVisible ? '<th>xi·fi</th>' : ''}
+        ${variancaVisible ? '<th>xi²</th><th>fi·xi²</th>' : ''}
+        </tr></thead><tbody>`;
+      fA.forEach((fi, i) => {
+        const xi = i+1, hi = fR[i], Hi = fAR[i];
+        const xiFi = xi * fi, xi2 = xi * xi, fiXi2 = fi * xi2;
+        sumXiFi += xiFi; sumFiXi2 += fiXi2;
+        const esModa = modaVisible && fi === modaMax;
+        const claseModa = esModa ? 'moda' : '';
+        html += `<tr>
+          <td>${xi}</td>
+          <td class="${claseModa}">${fi}</td>
+          <td>${fAc[i]}</td>
+          <td>${hi.toFixed(4)}</td>
+          <td>${Hi.toFixed(4)}</td>
+          ${mitjanaVisible ? `<td>${xiFi}</td>` : ''}
+          ${variancaVisible ? `<td>${xi2}</td><td>${fiXi2}</td>` : ''}
+        </tr>`;
+      });
+      if (mitjanaVisible) {
+        html += `<tr class="fila-total"><td colspan="${5 + (variancaVisible ? 2 : 0)}" style="text-align:right;">∑(xi·fi)</td><td>${sumXiFi}</td></tr>`;
+      }
+      if (variancaVisible) {
+        html += `<tr class="fila-total"><td colspan="${5 + (mitjanaVisible ? 1 : 0)}" style="text-align:right;">∑(fi·xi²)</td><td>${sumFiXi2}</td></tr>`;
+      }
+      html += `</tbody></table>`;
+      document.getElementById('taula-frequencies').innerHTML = html;
+      let info = '';
+      const mitjana = sumXiFi / N;
+      if (mitjanaVisible) info += `x̄ = ${mitjana.toFixed(4)}\n`;
+      if (variancaVisible) {
+        const varz = (sumFiXi2 / N) - mitjana * mitjana;
+        const sigma = Math.sqrt(varz);
+        info += `σ² = ${varz.toFixed(4)}\nσ = ${sigma.toFixed(4)}\n`;
+      }
+      if (coefVariacioVisible) {
+        const varz = (sumFiXi2 / N) - mitjana * mitjana;
+        const sigma = Math.sqrt(varz);
+        const cv = (sigma / mitjana) * 100;
+        info += `CV = (σ / x̄) × 100 = ${cv.toFixed(2)}%`;
+      }
+      document.getElementById('mitjana-valor').innerText = info;
+    }
+
+    function toggleModa()     { modaVisible = !modaVisible; generarTaula(); }
+    function toggleMitjana()   { mitjanaVisible = !mitjanaVisible; generarTaula(); }
+    function toggleVarianca()  { variancaVisible = !variancaVisible; generarTaula(); }
+    function toggleCoefVariacio() { coefVariacioVisible = !coefVariacioVisible; generarTaula(); }
+
+    function mostrarMediana() {
+      document.getElementById('pantalla-taula').classList.remove('visible');
+      document.getElementById('pantalla-mediana').classList.add('visible');
+      document.getElementById('mediana-info').innerText = '';
+      const cont = document.getElementById('serie-mediana');
+      cont.innerHTML = '';
+      const fA = estadistiques.frecAbs;
+      const fAc = estadistiques.frecAcum;
+      const simbols = ["⚀","⚁","⚂","⚃","⚄","⚅"];
+      let desde = 1;
+      fA.forEach((fi, i) => {
+        const hasta = fAc[i];
+        const simbol = simbols[i] || "🎲"+(i+1);
+        const div = document.createElement('div');
+        div.className = 'cara-dau';
+        div.innerHTML = `<div class="simbol-dau">${simbol}</div><div>${desde} – ${hasta}</div>`;
+        cont.appendChild(div);
+        desde = hasta + 1;
+      });
+    }
+    function identificarMediana() {
+      const N = estadistiques.total;
+      const pos = (N % 2 === 0) ? N/2 : (N+1)/2;
+      let cara = null;
+      estadistiques.frecAcum.forEach((ac, i) => {
+        if (cara === null && ac >= pos) cara = i+1;
+      });
+      document.getElementById('mediana-info').innerText = `Mediana: posició ${pos} → cara ${cara}`;
+      Array.from(document.getElementById('serie-mediana').children)
+        .forEach((d,i) => d.classList.toggle('resaltar', i+1 === cara));
+    }
+    function tornarATaula() {
+      document.getElementById('pantalla-mediana').classList.remove('visible');
+      document.getElementById('pantalla-taula').classList.add('visible');
+    }
+
+    function mostrarCuartils() {
+      document.getElementById('pantalla-taula').classList.remove('visible');
+      document.getElementById('pantalla-cuartils').classList.add('visible');
+      document.getElementById('quartil-info').innerText = '';
+      document.getElementById('percentil-info').innerText = '';
+      const cont = document.getElementById('serie-cuartils');
+      cont.innerHTML = '';
+      const fA = estadistiques.frecAbs;
+      const fAc = estadistiques.frecAcum;
+      const simbols = ["⚀","⚁","⚂","⚃","⚄","⚅"];
+      let desde = 1;
+      fA.forEach((fi, i) => {
+        const hasta = fAc[i];
+        const simbol = simbols[i] || "🎲"+(i+1);
+        const div = document.createElement('div');
+        div.className = 'cara-dau';
+        div.setAttribute('data-index', i);
+        div.innerHTML = `<div class="simbol-dau">${simbol}</div><div>${desde} – ${hasta}</div>`;
+        cont.appendChild(div);
+        desde = hasta + 1;
+      });
+    }
+    function identificarCuartils() {
+      const N = estadistiques.total;
+      const posiciones = [N/4, N/2, (3*N)/4];
+      const clases = ['resaltar-q1','resaltar','resaltar-q3'];
+      const nombres = ['Q1','Q2 (Mediana)','Q3'];
+      const divs = Array.from(document.getElementById('serie-cuartils').children);
+      divs.forEach(d => d.classList.remove(...clases, 'resaltar-percentil'));
+      let texto = '';
+      posiciones.forEach((pos, j) => {
+        let cara = null;
+        estadistiques.frecAcum.forEach((ac, i) => {
+          if (cara === null && ac >= pos) cara = i+1;
+        });
+        texto += `${nombres[j]}: posició ${pos.toFixed(2)} → cara ${cara}\n`;
+        if (cara !== null) divs[cara-1].classList.add(clases[j]);
+      });
+      document.getElementById('quartil-info').innerText = texto.trim();
+    }
+    function calcularPercentil() {
+      const k = parseInt(document.getElementById('percentil').value);
+      if (isNaN(k) || k < 1 || k > 99) {
+        alert('Introdueix un percentil entre 1 i 99.');
+        return;
+      }
+      const N = estadistiques.total;
+      const pos = (k * N) / 100;
+      const divs = Array.from(document.getElementById('serie-cuartils').children);
+      divs.forEach(d => d.classList.remove('resaltar-percentil'));
+      let cara = null;
+      estadistiques.frecAcum.forEach((ac, i) => {
+        if (cara === null && ac >= pos) cara = i+1;
+      });
+      if (cara !== null) {
+        divs[cara-1].classList.add('resaltar-percentil');
+        document.getElementById('percentil-info').innerText =
+          `P${k}: posició ${pos.toFixed(2)} → cara ${cara}`;
+      }
+    }
+    function tornarATaulaDesDeCuartils() {
+      document.getElementById('pantalla-cuartils').classList.remove('visible');
+      document.getElementById('pantalla-taula').classList.add('visible');
+    }
+  </script>
+</body>
+</html>

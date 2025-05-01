@@ -1,0 +1,31 @@
+{
+    "preguntes": [
+        {
+            "text": "Quin és el principi fonamental de totes les coses segons Heràclit?",
+            "opcions": {
+                "a": "El foc",
+                "b": "L'aigua",
+                "c": "L'aire"
+            },
+            "resposta": "a"
+        },
+        {
+            "text": "Què afirmava Anaximandre que era l'arjé?",
+            "opcions": {
+                "a": "El nombre",
+                "b": "L'àpeiron",
+                "c": "L'àtom"
+            },
+            "resposta": "b"
+        },
+        {
+            "text": "Què simbolitza el pas del mite al logos en la filosofia grega?",
+            "opcions": {
+                "a": "La permanència del pensament màgic",
+                "b": "L'aparició de noves mitologies",
+                "c": "L'inici del pensament racional"
+            },
+            "resposta": "c"
+        }
+    ]
+}

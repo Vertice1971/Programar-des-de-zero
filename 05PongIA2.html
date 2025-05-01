@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <title>Pong Clàssic</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      background: black;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="pong" width="800" height="500"></canvas>
+  <script>
+    const canvas = document.getElementById("pong");
+    const ctx = canvas.getContext("2d");
+
+    const xarxa = {
+      x: canvas.width / 2 - 1,
+      y: 0,
+      width: 2,
+      height: canvas.height,
+      color: "WHITE"
+    };
+
+    const jugador = {
+      x: 10,
+      y: canvas.height / 2 - 50,
+      width: 10,
+      height: 100,
+      color: "WHITE",
+      puntuacio: 0
+    };
+
+    const ia = {
+      x: canvas.width - 20,
+      y: canvas.height / 2 - 50,
+      width: 10,
+      height: 100,
+      color: "WHITE",
+      puntuacio: 0
+    };
+
+    const pilota = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      radius: 10,
+      speed: 5,
+      velocityX: 5,
+      velocityY: 5,
+      color: "WHITE"
+    };
+
+    function dibuixarRecta(x, y, w, h, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, w, h);
+    }
+
+    function dibuixarCercle(x, y, r, color) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2, false);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function dibuixarText(text, x, y, color) {
+      ctx.fillStyle = color;
+      ctx.font = "45px Arial";
+      ctx.fillText(text, x, y);
+    }
+
+    function dibuixarXarxa() {
+      dibuixarRecta(xarxa.x, xarxa.y, xarxa.width, xarxa.height, xarxa.color);
+    }
+
+    function renderitzar() {
+      dibuixarRecta(0, 0, canvas.width, canvas.height, "BLACK");
+      dibuixarXarxa();
+      dibuixarText(jugador.puntuacio, canvas.width / 4, 50, "WHITE");
+      dibuixarText(ia.puntuacio, 3 * canvas.width / 4, 50, "WHITE");
+      dibuixarRecta(jugador.x, jugador.y, jugador.width, jugador.height, jugador.color);
+      dibuixarRecta(ia.x, ia.y, ia.width, ia.height, ia.color);
+      dibuixarCercle(pilota.x, pilota.y, pilota.radius, pilota.color);
+    }
+
+    function colisio(b, p) {
+      b.top = b.y - b.radius;
+      b.bottom = b.y + b.radius;
+      b.left = b.x - b.radius;
+      b.right = b.x + b.radius;
+
+      p.top = p.y;
+      p.bottom = p.y + p.height;
+      p.left = p.x;
+      p.right = p.x + p.width;
+
+      return b.right > p.left && b.top < p.bottom && b.left < p.right && b.bottom > p.top;
+    }
+
+    function reiniciarPilota() {
+      pilota.x = canvas.width / 2;
+      pilota.y = canvas.height / 2;
+      pilota.velocityX = -pilota.velocityX;
+      pilota.speed = 5;
+    }
+
+    function actualitzar() {
+      pilota.x += pilota.velocityX;
+      pilota.y += pilota.velocityY;
+
+      // IA simple: segueix la pilota
+      ia.y += ((pilota.y - (ia.y + ia.height / 2))) * 0.1;
+
+      if (pilota.y + pilota.radius > canvas.height || pilota.y - pilota.radius < 0) {
+        pilota.velocityY = -pilota.velocityY;
+      }
+
+      let jugadorActual = (pilota.x < canvas.width / 2) ? jugador : ia;
+
+      if (colisio(pilota, jugadorActual)) {
+        let puntColisio = pilota.y - (jugadorActual.y + jugadorActual.height / 2);
+        puntColisio = puntColisio / (jugadorActual.height / 2);
+        let angleRad = (Math.PI / 4) * puntColisio;
+        let direccio = (pilota.x < canvas.width / 2) ? 1 : -1;
+        pilota.velocityX = direccio * pilota.speed * Math.cos(angleRad);
+        pilota.velocityY = pilota.speed * Math.sin(angleRad);
+        pilota.speed += 0.5;
+      }
+
+      if (pilota.x - pilota.radius < 0) {
+        ia.puntuacio++;
+        reiniciarPilota();
+      } else if (pilota.x + pilota.radius > canvas.width) {
+        jugador.puntuacio++;
+        reiniciarPilota();
+      }
+    }
+
+    function joc() {
+      actualitzar();
+      renderitzar();
+    }
+
+    setInterval(joc, 1000 / 60);
+
+    // Controls del jugador
+    document.addEventListener("keydown", function(evt) {
+      if (evt.key === "w" || evt.key === "W") jugador.y -= 20;
+      if (evt.key === "s" || evt.key === "S") jugador.y += 20;
+    });
+  </script>
+</body>
+</html>

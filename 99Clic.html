@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clicker de Recursos Millorat</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: rgba(0,0,0,0.75);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    h1 {
+      text-align: center;
+      color: #ffd700;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .resource-display {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .resource-amount {
+      font-size: 3em;
+      color: #4caf50;
+      font-weight: bold;
+    }
+    .resource-per-second {
+      font-size: 1.2em;
+      color: #dddddd;
+    }
+    .clicker-area {
+      background: rgba(255,255,255,0.1);
+      border: 3px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 40px;
+      text-align: center;
+      margin-bottom: 30px;
+      cursor: pointer;
+      transition: transform .1s;
+      position: relative;
+      user-select: none;
+    }
+    .clicker-area:active { transform: scale(0.95); }
+    .clicker-main {
+      font-size: 4em;
+      color: #ffd700;
+    }
+    .click-effect {
+      position: absolute;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #ffeb3b;
+      animation: float-up 1s forwards;
+      pointer-events: none;
+    }
+    @keyframes float-up {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-50px); opacity: 0; }
+    }
+    .upgrades-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(250px,1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .upgrade {
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all .3s;
+    }
+    .upgrade.locked { opacity: 0.6; filter: grayscale(50%); }
+    .upgrade.unlocked { border-color: #4caf50; }
+    .upgrade-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .upgrade-name { font-weight: bold; color: #ffd700; }
+    .upgrade-level {
+      background: rgba(0,0,0,0.4);
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: .9em;
+    }
+    .upgrade-description { font-size: .9em; color: #bbbbbb; margin-bottom: 10px; }
+    .upgrade-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: .9em;
+      margin-bottom: 10px;
+    }
+    .upgrade-cost { color: #ff9800; font-weight: bold; }
+    .upgrade-production { color: #4caf50; }
+    .upgrade-button {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      background: linear-gradient(to right,#4caf50,#8bc34a);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .upgrade-button:disabled {
+      background: linear-gradient(to right,#f44336,#e57373);
+      cursor: not-allowed;
+      opacity: .7;
+    }
+    .achievements-section {
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .achievements-title {
+      text-align: center;
+      color: #ffd700;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+    .achievements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+      gap: 10px;
+    }
+    .achievement {
+      background: rgba(0,0,0,0.4);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      border-left: 4px solid transparent;
+      transition: all .3s;
+    }
+    .achievement.unlocked {
+      border-left-color: #ffd700;
+      background: rgba(0,0,0,0.6);
+    }
+    .achievement-icon { font-size: 2em; margin-right: 10px; color: #ffd700; }
+    .achievement-info { flex: 1; }
+    .achievement-name { font-weight: bold; }
+    .achievement-description { font-size: .8em; color: #bbbbbb; }
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      color: #ffd700;
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      opacity: 0;
+      z-index: 1000;
+      animation: fadeInOut 3s ease-in-out forwards;
+    }
+    @keyframes fadeInOut {
+      0%,100% { opacity: 0; }
+      10%,90% { opacity: 1; }
+    }
+    .game-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .control-button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .control-button:hover { background: rgba(255,255,255,0.3); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Clicker de Recursos Millorat</h1>
+
+    <div class="resource-display">
+      <div class="resource-amount" id="resource-amount">0</div>
+      <div class="resource-per-second" id="resource-per-second">0 per segon</div>
+    </div>
+
+    <div class="clicker-area" id="clicker-area">
+      <div class="clicker-main">Fes clic!</div>
+    </div>
+
+    <div class="upgrades-section" id="upgrades-section"></div>
+
+    <div class="achievements-section">
+      <div class="achievements-title">Assoliments</div>
+      <div class="achievements-grid" id="achievements-grid"></div>
+    </div>
+
+    <div class="game-controls">
+      <button class="control-button" id="save-btn">Desar</button>
+      <button class="control-button" id="reset-btn">Reiniciar</button>
+    </div>
+  </div>
+  <script>
+    // Variables
+    let recursos = 0,
+        recursosPerClic = 1,
+        recursosPerSegon = 0,
+        clicsTotals = 0,
+        recursosTotalsGuanyats = 0;
+
+    // Millores
+    const millores = [
+      { id:1, nom:"Clic Millorat", desc:"+ producció per clic", costBase:10, costMult:1.15, prodBase:0.5, nivell:0, desbloquejat:true },
+      { id:2, nom:"Treballador", desc:"Produeix automàticament", costBase:50, costMult:1.15, prodBase:0.1, nivell:0, desbloquejat:true },
+      { id:3, nom:"Mina", desc:"Extreu recursos", costBase:200, costMult:1.15, prodBase:0.5, nivell:0, desbloquejat:false },
+      { id:4, nom:"Fàbrica", desc:"Gran escala", costBase:1000, costMult:1.15, prodBase:2, nivell:0, desbloquejat:false },
+      { id:5, nom:"Planta d'Energia", desc:"Tecnologia avançada", costBase:5000, costMult:1.15, prodBase:10, nivell:0, desbloquejat:false },
+      { id:6, nom:"Nau Espacial", desc:"Recull en altres planetes", costBase:20000, costMult:1.15, prodBase:50, nivell:0, desbloquejat:false }
+    ];
+
+    // Assoliments
+    const assoliments = [
+      { id:1, nom:"Primers Passos", desc:"10 clics", icona:"👣", cond:()=>clicsTotals>=10, recompensa:10, desbloquejat:false },
+      { id:2, nom:"Clicaire Novell", desc:"100 clics", icona:"🖱️", cond:()=>clicsTotals>=100, recompensa:50, desbloquejat:false },
+      { id:3, nom:"Primers Recursos", desc:"100 recursos", icona:"💰", cond:()=>recursosTotalsGuanyats>=100, recompensa:20, desbloquejat:false },
+      { id:4, nom:"Economia Automàtica", desc:"1 recurs/s", icona:"⚙️", cond:()=>recursosPerSegon>=1, recompensa:100, desbloquejat:false },
+      { id:5, nom:"Magnat", desc:"1000 recursos", icona:"💎", cond:()=>recursosTotalsGuanyats>=1000, recompensa:200, desbloquejat:false },
+      { id:6, nom:"Industrial", desc:"Desbloqueja totes les millores", icona:"🏭", cond:()=>millores.every(m=>m.desbloquejat), recompensa:500, desbloquejat:false }
+    ];
+
+    // DOM
+    const resAmtE = document.getElementById('resource-amount'),
+          resSecE = document.getElementById('resource-per-second'),
+          clickArea = document.getElementById('clicker-area'),
+          upgradesSec = document.getElementById('upgrades-section'),
+          achGrid = document.getElementById('achievements-grid'),
+          saveBtn = document.getElementById('save-btn'),
+          resetBtn = document.getElementById('reset-btn');
+
+    // Iniciar joc
+    function iniciarJoc(){
+      carregarPartida();
+      renderitzarMillores();
+      renderitzarAssoliments();
+      actualitzarPantalla();
+      clickArea.addEventListener('click', gestionarClic);
+      saveBtn.addEventListener('click', desarPartida);
+      resetBtn.addEventListener('click', reiniciarPartida);
+      setInterval(bucleDeJoc, 1000);
+      setInterval(desarPartida, 30000); // autodesament cada 30s
+    }
+
+    // Bucle cada segon
+    function bucleDeJoc(){
+      recursos += recursosPerSegon;
+      recursosTotalsGuanyats += recursosPerSegon;
+      comprovarDesbloquejosMillores();
+      comprovarAssoliments();
+      actualitzarPantalla();
+    }
+
+    // Gestionar clic principal
+    function gestionarClic(e){
+      recursos += recursosPerClic;
+      clicsTotals++;
+      recursosTotalsGuanyats += recursosPerClic;
+      crearEfecteClic(e);
+      actualitzarPantalla();
+    }
+
+    // Efecte visual de clic
+    function crearEfecteClic(e){
+      const fx = document.createElement('div');
+      fx.className = 'click-effect';
+      fx.textContent = `+${recursosPerClic}`;
+      const rect = clickArea.getBoundingClientRect();
+      fx.style.left = (e.clientX - rect.left) + 'px';
+      fx.style.top = (e.clientY - rect.top) + 'px';
+      clickArea.appendChild(fx);
+      setTimeout(()=>fx.remove(), 1000);
+    }
+
+    // Actualitzar valors en pantalla
+    function actualitzarPantalla(){
+      resAmtE.textContent = Math.floor(recursos);
+      resSecE.textContent = `${recursosPerSegon.toFixed(1)} per segon`;
+    }
+    // Renderitzar millores
+    function renderitzarMillores(){
+      upgradesSec.innerHTML = '';
+      millores.forEach(m=>{
+        if(!m.desbloquejat) return;
+        const cost = calcularCost(m);
+        const prod = calcularProduccio(m);
+        const div = document.createElement('div');
+        div.className = `upgrade ${m.desbloquejat?'unlocked':''}`;
+        div.innerHTML = `
+          <div class="upgrade-header">
+            <span class="upgrade-name">${m.nom}</span>
+            <span class="upgrade-level">Nivell ${m.nivell}</span>
+          </div>
+          <div class="upgrade-description">${m.desc}</div>
+          <div class="upgrade-stats">
+            <span class="upgrade-cost">${cost} 💰</span>
+            <span class="upgrade-production">${prod}${m.id===1?'/clic':'/s'}</span>
+          </div>
+          <button class="upgrade-button" ${recursos<cost?'disabled':''}>Comprar</button>
+        `;
+        const btn = div.querySelector('button');
+        btn.addEventListener('click',()=>comprarMillora(m.id));
+        upgradesSec.appendChild(div);
+      });
+    }
+
+    // Comprar millora
+    function comprarMillora(id){
+      const m = millores.find(x=>x.id===id);
+      const cost = calcularCost(m);
+      if(recursos<cost) return;
+      recursos -= cost;
+      m.nivell++;
+      if(m.id===1) recursosPerClic += m.prodBase;
+      else recursosPerSegon += m.prodBase;
+      desbloquejarSeguent(m.id);
+      renderitzarMillores(); actualitzarPantalla();
+    }
+
+    // Desbloquejar següent millora
+    function desbloquejarSeguent(id){
+      const seguent = millores.find(x=>x.id===id+1);
+      if(seguent && !seguent.desbloquejat && millores.find(x=>x.id===id).nivell>=5){
+        seguent.desbloquejat = true;
+        mostrarNotificacio(`Millora desbloquejada: ${seguent.nom}`);
+      }
+    }
+
+    // Comprovar desbloquejos
+    function comprovarDesbloquejosMillores(){
+      millores.forEach(m=>{
+        if(!m.desbloquejat && recursos>=calcularCost(m)*0.5){
+          m.desbloquejat = true;
+          mostrarNotificacio(`Nova millora disponible: ${m.nom}`);
+          renderitzarMillores();
+        }
+      });
+    }
+
+    // Càlculs de cost i producció
+    function calcularCost(m){ return Math.floor(m.costBase*Math.pow(m.costMult,m.nivell)); }
+    function calcularProduccio(m){ return (m.id===1?m.prodBase*m.nivell:m.prodBase*m.nivell).toFixed(1); }
+
+    // Renderitzar assoliments
+    function renderitzarAssoliments(){
+      achGrid.innerHTML = '';
+      assoliments.forEach(a=>{
+        const div = document.createElement('div');
+        div.className = `achievement ${a.desbloquejat?'unlocked':''}`;
+        div.innerHTML = `<div class="achievement-icon">${a.icona}</div>
+          <div class="achievement-info">
+            <div class="achievement-name">${a.nom}</div>
+            <div class="achievement-description">${a.desc}</div>
+          </div>`;
+        achGrid.appendChild(div);
+      });
+    }
+
+    // Comprovar assoliments
+    function comprovarAssoliments(){
+      let actualitzat = false;
+      assoliments.forEach(a=>{
+        if(!a.desbloquejat && a.cond()){
+          a.desbloquejat = true;
+          recursos += a.recompensa;
+          recursosTotalsGuanyats += a.recompensa;
+          mostrarNotificacio(`Assoliment desbloquejat: ${a.nom}! +${a.recompensa}`);
+          actualitzat = true;
+        }
+      });
+      if(actualitzat){
+        renderitzarAssoliments();
+        actualitzarPantalla();
+      }
+    }
+
+    // Notificacions
+    function mostrarNotificacio(msg){
+      const n = document.createElement('div');
+      n.className = 'notification';
+      n.textContent = msg;
+      document.body.appendChild(n);
+      setTimeout(()=>n.remove(),3000);
+    }
+
+    // Desa / Carrega partida
+    function desarPartida(){
+      localStorage.setItem('clicker_guarda', JSON.stringify({
+        recursos, recursosPerClic, recursosPerSegon,
+        clicsTotals, recursosTotalsGuanyats, millores, assoliments
+      }));
+      mostrarNotificacio('Partida desada');
+    }
+    function carregarPartida(){
+      const dades = JSON.parse(localStorage.getItem('clicker_guarda')||'null');
+      if(dades){
+        recursos = dades.recursos;
+        recursosPerClic = dades.recursosPerClic;
+        recursosPerSegon = dades.recursosPerSegon;
+        clicsTotals = dades.clicsTotals;
+        recursosTotalsGuanyats = dades.recursosTotalsGuanyats;
+        dades.millores.forEach((m,i)=>{ millores[i].nivell=m.nivell; millores[i].desbloquejat=m.desbloquejat; });
+        dades.assoliments.forEach((a,i)=>{ assoliments[i].desbloquejat=a.desbloquejat; });
+      }
+    }
+    function reiniciarPartida(){
+      localStorage.removeItem('clicker_guarda');
+      recursos = recursosPerClic = recursosPerSegon = clicsTotals = recursosTotalsGuanyats = 0;
+      millores.forEach(m=>{m.nivell=0; m.desbloquejat = m.id<=2;});
+      assoliments.forEach(a=>a.desbloquejat=false);
+      mostrarNotificacio('Partida reiniciada');
+      iniciarJoc();
+    }
+
+    // Iniciar
+    window.addEventListener('DOMContentLoaded', iniciarJoc);
+  </script>
+</body>
+</html>

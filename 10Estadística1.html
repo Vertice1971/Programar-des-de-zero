@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulació de tirades de dau</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 900px;
+      margin: 2em auto;
+      padding: 1em;
+      background-color: #f4f4f4;
+      border-radius: 10px;
+      text-align: center;
+    }
+    label, input, button {
+      display: block;
+      margin: 0.5em auto;
+    }
+    .pantalla {
+      display: none;
+    }
+    .visible {
+      display: block;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5em;
+      text-align: center;
+    }
+    th {
+      background-color: #eee;
+    }
+  </style>
+</head>
+<body>
+  <!-- Pantalla de simulació -->
+  <div id="pantalla-inici" class="pantalla visible">
+    <h1>Simulació de tirades de dau</h1>
+    <label for="caras">Nombre de cares del dau:</label>
+    <input type="number" id="caras" min="2" value="6">
+    <label for="tirades">Nombre de tirades:</label>
+    <input type="number" id="tirades" min="1" value="100">
+    <button onclick="simular()">Tirar dau</button>
+    <div id="resultats"></div>
+    <button id="veureTaulaBtn" style="display:none;" onclick="mostrarTaula()">Veure taula de freqüències</button>
+  </div>
+
+  <!-- Pantalla de la taula -->
+  <div id="pantalla-taula" class="pantalla">
+    <h2>Taula de freqüències</h2>
+    <div id="taula-frequencies"></div>
+    <button onclick="tornar()">Tornar a la simulació</button>
+  </div>
+
+  <script>
+    let dadesGuardades = [];
+    let estadistiques = {};
+
+    // PRNG xoshiro128** a partir de llavor de text
+    function splitMix32(seed) {
+      let h = seed >>> 0;
+      return function() {
+        h += 0x9e3779b9;
+        let t = h;
+        t = Math.imul(t ^ (t >>> 16), 0x85ebca6b);
+        t = Math.imul(t ^ (t >>> 13), 0xc2b2ae35);
+        return (t ^ (t >>> 16)) >>> 0;
+      };
+    }
+    function xoshiro128ss(seedStr) {
+      let seed = 0;
+      for (let i = 0; i < seedStr.length; i++) {
+        seed = (seed * 31 + seedStr.charCodeAt(i)) >>> 0;
+      }
+      const sm = splitMix32(seed);
+      let s = [sm(), sm(), sm(), sm()];
+      function rotl(x, k) {
+        return (x << k) | (x >>> (32 - k));
+      }
+      return function() {
+        const result = rotl(s[1] * 5, 7) * 9;
+        const t = s[1] << 9;
+        s[2] ^= s[0];
+        s[3] ^= s[1];
+        s[1] ^= s[2];
+        s[0] ^= s[3];
+        s[2] ^= t;
+        s[3] = rotl(s[3], 11);
+        return (result >>> 0) / 2**32;
+      };
+    }
+
+    // Simula tirades
+    function simular() {
+      const cares = parseInt(document.getElementById('caras').value);
+      const tirades = parseInt(document.getElementById('tirades').value);
+      if (isNaN(cares) || isNaN(tirades) || cares < 2 || tirades < 1) {
+        alert("Introdueix valors vàlids (mínim 2 cares i 1 tirada).");
+        return;
+      }
+      const llavor = (Date.now() + Math.random()).toString();
+      const rng = xoshiro128ss(llavor);
+      const resultats = [];
+      for (let i = 0; i < tirades; i++) {
+        resultats.push(Math.floor(rng() * cares) + 1);
+      }
+      dadesGuardades = resultats;
+      calcularEstadistiques(cares, resultats);
+      mostrarResultats(resultats);
+    }
+
+    // Calcula freqüències absolutes i acumulades
+    function calcularEstadistiques(cares, dades) {
+      const total = dades.length;
+      const freqAbs = Array(cares).fill(0);
+      dades.forEach(v => freqAbs[v - 1]++);
+      const freqAcum = [];
+      let acc = 0;
+      freqAbs.forEach(f => {
+        acc += f;
+        freqAcum.push(acc);
+      });
+      estadistiques = { frequenciasAbsolutes: freqAbs, frequenciasAcumulades: freqAcum, total };
+    }
+
+    // Mostra llista de resultats i activa botó de taula
+    function mostrarResultats(resultats) {
+      document.getElementById('resultats').innerHTML =
+        `<h2>Resultats:</h2><p>${resultats.join(', ')}</p>`;
+      document.getElementById('veureTaulaBtn').style.display = 'block';
+    }
+
+    // Canvia a pantalla de taula
+    function mostrarTaula() {
+      document.getElementById('pantalla-inici').classList.remove('visible');
+      document.getElementById('pantalla-taula').classList.add('visible');
+      generarTaulaFrequenciesSimple();
+    }
+
+    // Genera només Cara / fi / Fi
+    function generarTaulaFrequenciesSimple() {
+      const { frequenciasAbsolutes: freqAbs, frequenciasAcumulades: freqAcum } = estadistiques;
+      const cares = freqAbs.length;
+      let html = `<table>
+        <thead>
+          <tr><th>Cara</th><th>fi</th><th>Fi</th></tr>
+        </thead><tbody>`;
+      for (let i = 0; i < cares; i++) {
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${freqAbs[i]}</td>
+          <td>${freqAcum[i]}</td>
+        </tr>`;
+      }
+      html += `</tbody></table>`;
+      document.getElementById('taula-frequencies').innerHTML = html;
+    }
+
+    // Tornar a simulació
+    function tornar() {
+      document.getElementById('pantalla-taula').classList.remove('visible');
+      document.getElementById('pantalla-inici').classList.add('visible');
+      document.getElementById('veureTaulaBtn').style.display = 'none';
+      document.getElementById('resultats').innerHTML = '';
+    }
+  </script>
+</body>
+</html>

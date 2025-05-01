@@ -1,0 +1,175 @@
+{
+  "preguntes": [
+    {
+      "text": "Què estudia la genètica?",
+      "opcions": {
+        "a": "El comportament dels animals",
+        "b": "La transmissió de caràcters hereditaris",
+        "c": "El creixement de les plantes"
+      },
+      "resposta": "b"
+    },
+    {
+      "text": "Què és un gen?",
+      "opcions": {
+        "a": "Una proteïna que forma part de l'ADN",
+        "b": "Una cèl·lula del sistema nerviós",
+        "c": "Un fragment d'ADN que determina un caràcter"
+      },
+      "resposta": "c"
+    },
+    {
+      "text": "Què és un al·lel?",
+      "opcions": {
+        "a": "Un tipus especial de proteïna",
+        "b": "Una forma alternativa d'un gen",
+        "c": "Un cromosoma defectuós"
+      },
+      "resposta": "b"
+    },
+    {
+      "text": "Què significa que un individu sigui homozigot?",
+      "opcions": {
+        "a": "Té dos al·lels diferents per a un caràcter",
+        "b": "Té dos al·lels iguals per a un caràcter",
+        "c": "Té més de dos al·lels"
+      },
+      "resposta": "b"
+    },
+    {
+      "text": "Què és el genotip?",
+      "opcions": {
+        "a": "L'aparença externa d'un organisme",
+        "b": "El conjunt de gens que posseeix un individu",
+        "c": "La quantitat de proteïnes que produeix un organisme"
+      },
+      "resposta": "b"
+    },
+    {
+      "text": "Què és el fenotip?",
+      "opcions": {
+        "a": "La manifestació observable del genotip",
+        "b": "La seqüència de nucleòtids en l'ADN",
+        "c": "El tipus de cèl·lula que forma un teixit"
+      },
+      "resposta": "a"
+    },
+    {
+      "text": "Quina és la primera llei de Mendel?",
+      "opcions": {
+        "a": "Herència intermèdia",
+        "b": "Segregació d'al·lels",
+        "c": "Uniformitat de la F1"
+      },
+      "resposta": "c"
+    },
+    {
+      "text": "Què passa en la segona llei de Mendel?",
+      "opcions": {
+        "a": "Apareix el caràcter recessiu en F2",
+        "b": "Tots els descendents són iguals",
+        "c": "Els gens es barregen completament"
+      },
+      "resposta": "a"
+    },
+    {
+      "text": "Quina proporció s'obté en la tercera llei de Mendel (herència independent)?",
+      "opcions": {
+        "a": "3:1",
+        "b": "9:3:3:1",
+        "c": "1:2:1"
+      },
+      "resposta": "b"
+    },
+    {
+      "text": "Qui va proposar la teoria cromosòmica de l'herència?",
+      "opcions": {
+        "a": "Mendel",
+        "b": "Watson i Crick",
+        "c": "Sutton i Boveri"
+      },
+      "resposta": "c"
+    },
+    {
+      "text": "Què va demostrar Thomas Morgan?",
+      "opcions": {
+        "a": "La doble hèlix de l'ADN",
+        "b": "L'herència lligada al sexe",
+        "c": "La replicació semiconservativa"
+      },
+      "resposta": "b"
+    },
+    {
+      "text": "Què són els cromosomes homòlegs?",
+      "opcions": {
+        "a": "Dos cromosomes idèntics d'un mateix progenitor",
+        "b": "Dos cromosomes amb els mateixos gens, un de cada progenitor",
+        "c": "Cromosomes que es dupliquen en la mitosi"
+      },
+      "resposta": "b"
+    },
+    {
+      "text": "Quin tipus d'herència està determinada per diversos gens?",
+      "opcions": {
+        "a": "Letal",
+        "b": "Dominant-recessiva",
+        "c": "Poligènica"
+      },
+      "resposta": "c"
+    },
+    {
+      "text": "Què és l'epistàsia?",
+      "opcions": {
+        "a": "Un gen afecta diversos caràcters",
+        "b": "Un gen modifica l'expressió d'un altre",
+        "c": "Dos gens es dupliquen"
+      },
+      "resposta": "b"
+    },
+    {
+      "text": "Què significa que un al·lel sigui letal?",
+      "opcions": {
+        "a": "Que no s'expressa en el fenotip",
+        "b": "Que provoca una malaltia lleu",
+        "c": "Que pot causar la mort de l'individu"
+      },
+      "resposta": "c"
+    },
+    {
+      "text": "Quina eina s'utilitza per predir la descendència genètica?",
+      "opcions": {
+        "a": "Microscopi",
+        "b": "Quadrícula de Punnett",
+        "c": "Arbre genealògic"
+      },
+      "resposta": "b"
+    },
+    {
+      "text": "Quina combinació determina el sexe masculí en humans?",
+      "opcions": {
+        "a": "XX",
+        "b": "XY",
+        "c": "YY"
+      },
+      "resposta": "b"
+    },
+    {
+      "text": "On es localitzen la majoria dels gens lligats al sexe?",
+      "opcions": {
+        "a": "Cromosoma Y",
+        "b": "Cromosoma X",
+        "c": "Cromosoma 21"
+      },
+      "resposta": "b"
+    },
+    {
+      "text": "Per què els homes manifesten més malalties recessives lligades a l'X?",
+      "opcions": {
+        "a": "Perquè tenen més gens",
+        "b": "Perquè tenen dos cromosomes X",
+        "c": "Perquè només tenen una còpia del cromosoma X"
+      },
+      "resposta": "c"
+    }
+  ]
+}

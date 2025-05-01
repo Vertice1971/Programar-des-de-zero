@@ -1,0 +1,49 @@
+{
+  "preguntes": [
+    {
+      "text": "Quina va ser una de les causes principals de la Revolució Francesa?",
+      "opcions": {
+        "a": "El descobriment d'Amèrica",
+        "b": "La crisi econòmica i social de l'Antic Règim",
+        "c": "La guerra de Successió Espanyola"
+      },
+      "resposta": "b"
+    },
+    {
+      "text": "Quin personatge va ser clau en el desenvolupament de l'Imperi Napoleònic?",
+      "opcions": {
+        "a": "Lluís XVI",
+        "b": "Robespierre",
+        "c": "Napoleó Bonaparte"
+      },
+      "resposta": "c"
+    },
+    {
+      "text": "En quin any va començar aproximadament la Revolució Industrial a Anglaterra?",
+      "opcions": {
+        "a": "A finals del segle XVIII",
+        "b": "A mitjan segle XIX",
+        "c": "A principis del segle XVII"
+      },
+      "resposta": "a"
+    },
+    {
+      "text": "Quina va ser una conseqüència social de la Revolució Industrial?",
+      "opcions": {
+        "a": "L'augment del poder de la noblesa",
+        "b": "L'aparició d'una classe obrera urbana",
+        "c": "El reforçament del feudalisme"
+      },
+      "resposta": "b"
+    },
+    {
+      "text": "Quina ideologia defensava la propietat privada i el lliure mercat al segle XIX?",
+      "opcions": {
+        "a": "El liberalisme",
+        "b": "El socialisme utòpic",
+        "c": "L'absolutisme"
+      },
+      "resposta": "a"
+    }
+  ]
+}
